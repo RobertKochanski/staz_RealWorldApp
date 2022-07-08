@@ -13,7 +13,7 @@ namespace RealWebAppAPI
             // Add services to the container.
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase(connectionString));
+                options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 
@@ -26,7 +26,19 @@ namespace RealWebAppAPI
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddRazorPages();
 
+            builder.Services.AddCors(option =>
+            {
+                option.AddPolicy("Front", builder =>
+                {
+                    builder.AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowAnyOrigin();
+                });
+            });
+
             var app = builder.Build();
+
+            app.UseCors("Front");
 
             app.UseSwagger();
             app.UseSwaggerUI();
