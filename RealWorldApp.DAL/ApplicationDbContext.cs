@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Duende.IdentityServer.EntityFramework.Options;
+using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using RealWorldApp.DAL.Entities;
 
 namespace RealWebAppAPI.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<User>
+    public class ApplicationDbContext : ApiAuthorizationDbContext<User>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
+        public ApplicationDbContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions)
+            : base(options, operationalStoreOptions)
         {
         }
 
