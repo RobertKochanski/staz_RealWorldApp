@@ -12,7 +12,7 @@ using RealWebAppAPI.Data;
 namespace RealWorldApp.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220711200349_initial")]
+    [Migration("20220712071114_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -404,6 +404,7 @@ namespace RealWorldApp.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 

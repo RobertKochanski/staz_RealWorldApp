@@ -5,17 +5,19 @@ using RealWorldApp.BAL.Services.Intefaces;
 
 namespace RealWebAppAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
 
-        public UserController(IUserService userService)
+        public UsersController(IUserService userService)
         {
             _userService = userService;
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> RegisterUser(UserRegister request)
         {
@@ -23,7 +25,8 @@ namespace RealWebAppAPI.Controllers
             return Ok();
         }
 
-        [HttpPost("authenticate")]
+        [AllowAnonymous]
+        [HttpPost("login")]
         public async Task<IActionResult> Authenticate(UserLogin model)
         {
             string token = await _userService.GenerateJwt(model);
@@ -38,9 +41,9 @@ namespace RealWebAppAPI.Controllers
         }
 
         [HttpGet("Username")]
-        public async Task<IActionResult> GetUserByUsername(string Username)
+        public async Task<IActionResult> GetUserByEmail(string Email)
         {
-            return Ok(await _userService.GetUserByUsername(Username));
+            return Ok(await _userService.GetUserByEmail(Email));
         }
 
         [HttpGet("{Id}")]

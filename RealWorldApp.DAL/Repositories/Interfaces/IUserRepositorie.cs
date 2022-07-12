@@ -6,7 +6,7 @@ namespace RealWorldApp.DAL.Repositories.Interfaces
     {
         Task<List<User>> GetUsers();
         Task AddUser(User user);
-        Task<User> GetUserByUsername(string Username);
+        Task<User> GetUserByEmail(string Email);
         Task<User> GetUserById(string Id);
         Task SaveChangesAsync();
     }

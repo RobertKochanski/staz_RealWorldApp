@@ -28,24 +28,25 @@ namespace RealWorldApp.BAL.Services
 
         public async Task<string> GenerateJwt(UserLogin model)
         {
-            var user = await _userRepositorie.GetUserByUsername(model.Username);
+            var user = await _userRepositorie.GetUserByEmail(model.Email);
 
             if (user is null)
             {
-                throw new Exception("Invalid email or password");
+                throw new Exception("Invalid username or password");
             }
 
             var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, model.Password);
 
             if (result == PasswordVerificationResult.Failed)
             {
-                throw new Exception("Invalid email or password");
+                throw new Exception("Invalid username or password");
             }
 
             var claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, $"{user.UserName}")
+                new Claim(ClaimTypes.Name, $"{user.UserName}"),
+                new Claim(ClaimTypes.Email, $"{user.Email}")
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));
@@ -84,9 +85,9 @@ namespace RealWorldApp.BAL.Services
             return _mapper.Map<List<ViewUserModel>>(users);
         }
 
-        public async Task<ViewUserModel> GetUserByUsername(string Username)
+        public async Task<ViewUserModel> GetUserByEmail(string Email)
         {
-            var user = await _userRepositorie.GetUserByUsername(Username);
+            var user = await _userRepositorie.GetUserByEmail(Email);
             return _mapper.Map<ViewUserModel>(user);
         }
 
