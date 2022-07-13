@@ -21,6 +21,7 @@ namespace RealWebAppAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddControllers();
 
             // Add services to the container.
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -62,9 +63,6 @@ namespace RealWebAppAPI
                 };
             })
             .AddIdentityServerJwt();
-
-
-            builder.Services.AddControllers();
 
             builder.Services.AddScoped<IUserRepositorie, UserRepositorie>();
             builder.Services.AddScoped<IUserService, UserService>();

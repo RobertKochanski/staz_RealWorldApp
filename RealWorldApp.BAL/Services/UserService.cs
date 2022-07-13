@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RealWorldApp.BAL.Models;
 using RealWorldApp.BAL.Services.Intefaces;
@@ -17,25 +18,28 @@ namespace RealWorldApp.BAL.Services
         private readonly IMapper _mapper;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly AuthenticationSettings _authenticationSettings;
+        private readonly UserManager<User> _userManager;
 
-        public UserService(IUserRepositorie userRepositorie, IMapper mapper, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings)
+        public UserService(IUserRepositorie userRepositorie, IMapper mapper, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings, UserManager<User> userManager)
         {
             _userRepositorie = userRepositorie;
             _mapper = mapper;
             _passwordHasher = passwordHasher;
             _authenticationSettings = authenticationSettings;
+            _userManager = userManager;
         }
 
         public async Task<string> GenerateJwt(string Email, string Password)
         {
-            var user = await _userRepositorie.GetUserByEmail(Email);
+            var user = await _userRepositorie.GetUserByEmail(Email); // Wersja robocza
+            // var user = await _userManager.FindByEmailAsync(Email); // Wersja z userManager, nie działa XD
 
             if (user is null)
             {
-                throw new Exception("Invalid username or password");
+                throw new ArgumentNullException("Invalid username or password");
             }
 
-            if (_passwordHasher.Equals(Password == user.PasswordHash))
+            if (!Password.Equals(user.PasswordHash))
             {
                 var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, Password);
 
@@ -68,18 +72,20 @@ namespace RealWorldApp.BAL.Services
 
         public async Task<UserResponseContainer> AddUser(UserRegister request)
         {
-            var user = new User()
+            User user = new User()
             {
+                Email = request.Email,
                 UserName = request.Username,
-                Email = request.Email
+                SecurityStamp = Guid.NewGuid().ToString(),
             };
 
-            var hashPassword = _passwordHasher.HashPassword(user, request.Password);
+            var result = await _userManager.CreateAsync(user, request.Password);
 
-            user.PasswordHash = hashPassword;
-
-            await _userRepositorie.AddUser(user);
-
+            if (!result.Succeeded)
+            {
+                throw new Exception("Something goes wrong!");
+            }
+            
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
 
             return userContainer;
@@ -87,8 +93,8 @@ namespace RealWorldApp.BAL.Services
 
         public async Task<List<ViewUserModel>> GetUsers()
         {
-            var users = await _userRepositorie.GetUsers();
-            return _mapper.Map<List<ViewUserModel>>(users);
+            var usersList = await _userManager.Users.ToListAsync();
+            return _mapper.Map<List<ViewUserModel>>(usersList);
         }
 
         public async Task<UserResponseContainer> GetUserByEmail(string Email)

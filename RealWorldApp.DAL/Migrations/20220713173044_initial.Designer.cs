@@ -12,7 +12,7 @@ using RealWebAppAPI.Data;
 namespace RealWorldApp.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220712111439_initial")]
+    [Migration("20220713173044_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -447,10 +447,17 @@ namespace RealWorldApp.DAL.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Id")
+                        .IsUnique();
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -459,6 +466,9 @@ namespace RealWorldApp.DAL.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
