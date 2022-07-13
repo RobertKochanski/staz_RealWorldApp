@@ -21,27 +21,6 @@ namespace RealWebAppAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var authenticationSettings = new AuthenticationSettings();
-
-            builder.Configuration.GetSection("Authentication").Bind(authenticationSettings);
-
-            builder.Services.AddSingleton(authenticationSettings);
-            builder.Services.AddAuthentication(option =>
-            {
-                option.DefaultAuthenticateScheme = "Bearer";
-                option.DefaultScheme = "Bearer";
-                option.DefaultChallengeScheme = "Bearer";
-            }).AddJwtBearer(cfg =>
-            {
-                cfg.RequireHttpsMetadata = false;
-                cfg.SaveToken = true;
-                cfg.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidIssuer = authenticationSettings.JwtIssuer,
-                    ValidAudience = authenticationSettings.JwtIssuer,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationSettings.JwtKey))
-                };
-            });
 
             // Add services to the container.
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -51,14 +30,39 @@ namespace RealWebAppAPI
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                 .AddDefaultTokenProviders();
 
             builder.Services.AddIdentityServer()
                 .AddApiAuthorization<User, ApplicationDbContext>()
                 .AddDeveloperSigningCredential();
 
-            builder.Services.AddAuthentication()
-                .AddIdentityServerJwt();
+            var authenticationSettings = new AuthenticationSettings();
+            builder.Configuration.GetSection("Authentication").Bind(authenticationSettings);
+            builder.Services.AddSingleton(authenticationSettings);
+
+
+            builder.Services.AddAuthentication(option =>
+            {
+                option.DefaultAuthenticateScheme = "Bearer";
+                option.DefaultScheme = "Bearer";
+                option.DefaultChallengeScheme = "Bearer";
+            })
+            .AddJwtBearer("Bearer", cfg =>
+            {
+                cfg.RequireHttpsMetadata = false;
+                cfg.SaveToken = true;
+                cfg.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidIssuer = authenticationSettings.JwtIssuer,
+                    ValidAudience = authenticationSettings.JwtIssuer,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationSettings.JwtKey))
+                };
+            })
+            .AddIdentityServerJwt();
+
 
             builder.Services.AddControllers();
 

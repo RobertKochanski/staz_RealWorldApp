@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using RealWorldApp.BAL.Models;
 using RealWorldApp.BAL.Services.Intefaces;
 
@@ -53,14 +54,26 @@ namespace RealWebAppAPI.Controllers
         [HttpGet("user")]
         public async Task<IActionResult> GetMyInfo()
         {
-            return Ok(await _userService.GetMyInfo(User));
+            UserResponseContainer user = await _userService.GetMyInfo(User);
+            string token = this.Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+
+            user.User.Token = token;
+
+            return Ok(user);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateUser(string id, UserUpdateModel request)
+        [HttpGet("profiles/{Username}")]
+        public async Task<IActionResult> GetProfile([FromRoute]string Username)
         {
-            await _userService.UpdateUser(id, request);
-            return Ok();
+            return Ok(await _userService.GetProfile(Username));
+        }
+
+        [HttpPut("user")]
+        public async Task<IActionResult> UpdateUser(UserUpdateModelContainer request)
+        {
+            string token = this.Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+            UserResponseContainer user = await _userService.UpdateUser(request, User, token);
+            return Ok(user);
         }
     }
 }

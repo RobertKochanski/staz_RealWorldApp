@@ -102,25 +102,43 @@ namespace RealWorldApp.BAL.Services
         public async Task<UserResponseContainer> GetMyInfo(ClaimsPrincipal claims)
         {
             var user = await _userRepositorie.GetUserById(claims.Identity.Name);
-            string token = await GenerateJwt(user.Email, user.PasswordHash);
-            user.Token = token;
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
 
             return userContainer;
         }
 
-        public async Task UpdateUser(string id, UserUpdateModel request)
+        public async Task<ProfileResponseContainer> GetProfile(string Username)
         {
-            var user = await _userRepositorie.GetUserById(id);
+            var user = await _userRepositorie.GetUserByUsername(Username);
+            ProfileResponseContainer profileContainer = new ProfileResponseContainer() { Profile = _mapper.Map<ProfileResponse>(user) };
 
-            user.UserName = request.UserName;
-            user.Bio = request.Bio;
-            user.Image = request.Image;
-            user.Email = request.Email;
-            user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
+            return profileContainer;
+        }
+
+        public async Task<UserResponseContainer> UpdateUser(UserUpdateModelContainer request, ClaimsPrincipal claims, string token)
+        {
+            var user = await _userRepositorie.GetUserById(claims.Identity.Name);
+
+            if (!String.IsNullOrEmpty(request.User.Password))
+            {
+                user.PasswordHash = _passwordHasher.HashPassword(user, request.User.Password);
+            }
+
+            if (!String.IsNullOrEmpty(request.User.Image))
+            {
+                user.Image = request.User.Image;
+            }
+
+            user.UserName = request.User.UserName;
+            user.Bio = request.User.Bio;
+            user.Email = request.User.Email;
+            user.Token = token;
 
             await _userRepositorie.SaveChangesAsync();
-            
+
+            UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
+
+            return userContainer;
         }
     }
 }

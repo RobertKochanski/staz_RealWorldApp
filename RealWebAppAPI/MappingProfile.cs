@@ -10,6 +10,7 @@ namespace RealWebAppAPI
         {
             CreateMap<User, ViewUserModel>();
             CreateMap<User, UserResponse>();
+            CreateMap<User, ProfileResponse>();
         }
     }
 }
