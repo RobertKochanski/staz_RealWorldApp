@@ -9,6 +9,7 @@ namespace RealWebAppAPI
         public MappingProfile()
         {
             CreateMap<User, ViewUserModel>();
+            CreateMap<User, UserResponse>();
         }
     }
 }

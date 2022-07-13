@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace RealWorldApp.BAL.Models
 {
+    public class UserLoginContainer
+    {
+        public UserLogin User { get; set; }
+    }
+
     public class UserLogin
     {
         public string Email { get; set; }

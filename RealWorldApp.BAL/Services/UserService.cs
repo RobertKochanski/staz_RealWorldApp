@@ -26,26 +26,28 @@ namespace RealWorldApp.BAL.Services
             _authenticationSettings = authenticationSettings;
         }
 
-        public async Task<string> GenerateJwt(UserLogin model)
+        public async Task<string> GenerateJwt(string Email, string Password)
         {
-            var user = await _userRepositorie.GetUserByEmail(model.Email);
+            var user = await _userRepositorie.GetUserByEmail(Email);
 
             if (user is null)
             {
                 throw new Exception("Invalid username or password");
             }
 
-            var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, model.Password);
-
-            if (result == PasswordVerificationResult.Failed)
+            if (_passwordHasher.Equals(Password == user.PasswordHash))
             {
-                throw new Exception("Invalid username or password");
-            }
+                var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, Password);
 
+                if (result == PasswordVerificationResult.Failed)
+                {
+                    throw new Exception("Invalid username or password");
+                }
+            }
+            
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, $"{user.UserName}"),
+                new Claim(ClaimTypes.Name, user.Id),
                 new Claim(ClaimTypes.Email, $"{user.Email}")
             };
 
@@ -64,7 +66,7 @@ namespace RealWorldApp.BAL.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public async Task AddUser(UserRegister request)
+        public async Task<UserResponseContainer> AddUser(UserRegister request)
         {
             var user = new User()
             {
@@ -77,6 +79,10 @@ namespace RealWorldApp.BAL.Services
             user.PasswordHash = hashPassword;
 
             await _userRepositorie.AddUser(user);
+
+            UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
+
+            return userContainer;
         }
 
         public async Task<List<ViewUserModel>> GetUsers()
@@ -85,16 +91,22 @@ namespace RealWorldApp.BAL.Services
             return _mapper.Map<List<ViewUserModel>>(users);
         }
 
-        public async Task<ViewUserModel> GetUserByEmail(string Email)
+        public async Task<UserResponseContainer> GetUserByEmail(string Email)
         {
             var user = await _userRepositorie.GetUserByEmail(Email);
-            return _mapper.Map<ViewUserModel>(user);
+            UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
+
+            return userContainer;
         }
 
-        public async Task<ViewUserModel> GetUserById(string Id)
+        public async Task<UserResponseContainer> GetMyInfo(ClaimsPrincipal claims)
         {
-            var user = await _userRepositorie.GetUserById(Id);
-            return _mapper.Map<ViewUserModel>(user);
+            var user = await _userRepositorie.GetUserById(claims.Identity.Name);
+            string token = await GenerateJwt(user.Email, user.PasswordHash);
+            user.Token = token;
+            UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
+
+            return userContainer;
         }
 
         public async Task UpdateUser(string id, UserUpdateModel request)
@@ -103,7 +115,7 @@ namespace RealWorldApp.BAL.Services
 
             user.UserName = request.UserName;
             user.Bio = request.Bio;
-            user.URL = request.URL;
+            user.Image = request.Image;
             user.Email = request.Email;
             user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
 
