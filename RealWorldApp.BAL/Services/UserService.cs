@@ -2,10 +2,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using RealWorldApp.BAL.Models;
-using RealWorldApp.BAL.Services.Intefaces;
-using RealWorldApp.DAL.Entities;
-using RealWorldApp.DAL.Repositories.Interfaces;
+using RealWorldApp.Commons.Entities;
+using RealWorldApp.Commons.Intefaces;
+using RealWorldApp.Commons.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -108,6 +107,10 @@ namespace RealWorldApp.BAL.Services
         public async Task<UserResponseContainer> GetMyInfo(ClaimsPrincipal claims)
         {
             var user = await _userRepositorie.GetUserById(claims.Identity.Name);
+            string token = await GenerateJwt(user.Email, user.PasswordHash);
+
+            user.Token = token;
+
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
 
             return userContainer;
@@ -123,7 +126,7 @@ namespace RealWorldApp.BAL.Services
 
         public async Task<UserResponseContainer> UpdateUser(UserUpdateModelContainer request, ClaimsPrincipal claims, string token)
         {
-            var user = await _userRepositorie.GetUserById(claims.Identity.Name);
+            var user = await _userManager.FindByIdAsync(claims.Identity.Name);
 
             if (!String.IsNullOrEmpty(request.User.Password))
             {
@@ -140,7 +143,7 @@ namespace RealWorldApp.BAL.Services
             user.Email = request.User.Email;
             user.Token = token;
 
-            await _userRepositorie.SaveChangesAsync();
+            await _userManager.UpdateAsync(user);
 
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
 

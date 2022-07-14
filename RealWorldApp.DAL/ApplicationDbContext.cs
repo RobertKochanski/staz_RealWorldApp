@@ -1,11 +1,10 @@
 ﻿using Duende.IdentityServer.EntityFramework.Options;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using RealWorldApp.DAL.Entities;
+using RealWorldApp.Commons.Entities;
 
-namespace RealWebAppAPI.Data
+namespace RealWorldApp.DAL
 {
     public class ApplicationDbContext : ApiAuthorizationDbContext<User>
     {

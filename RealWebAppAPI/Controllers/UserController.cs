@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using RealWorldApp.BAL.Models;
-using RealWorldApp.BAL.Services.Intefaces;
+using RealWorldApp.Commons.Intefaces;
+using RealWorldApp.Commons.Models;
 
 namespace RealWebAppAPI.Controllers
 {
+    [Authorize]
     [Route("api")]
     [ApiController]
     public class UserController : ControllerBase
@@ -17,6 +18,7 @@ namespace RealWebAppAPI.Controllers
             _userService = userService;
         }
 
+        [AllowAnonymous]
         [HttpPost("users")]
         public async Task<IActionResult> RegisterUser([FromBody]UserRegisterContainer model)
         {
@@ -28,6 +30,7 @@ namespace RealWebAppAPI.Controllers
             return Ok(user);
         }
 
+        [AllowAnonymous]
         [HttpPost("users/login")]
         public async Task<IActionResult> Authenticate([FromBody]UserLoginContainer model)
         {
@@ -55,9 +58,12 @@ namespace RealWebAppAPI.Controllers
         public async Task<IActionResult> GetMyInfo()
         {
             UserResponseContainer user = await _userService.GetMyInfo(User);
-            string token = this.Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
 
-            user.User.Token = token;
+            if (user.User.Token != null)
+            {
+                string token = this.Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+                user.User.Token = token;
+            }
 
             return Ok(user);
         }

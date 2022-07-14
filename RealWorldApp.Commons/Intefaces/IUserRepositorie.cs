@@ -1,6 +1,6 @@
-﻿using RealWorldApp.DAL.Entities;
+﻿using RealWorldApp.Commons.Entities;
 
-namespace RealWorldApp.DAL.Repositories.Interfaces
+namespace RealWorldApp.Commons.Intefaces
 {
     public interface IUserRepositorie
     {

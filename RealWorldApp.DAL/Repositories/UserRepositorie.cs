@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RealWebAppAPI.Data;
-using RealWorldApp.DAL.Entities;
-using RealWorldApp.DAL.Repositories.Interfaces;
+using RealWorldApp.Commons.Entities;
+using RealWorldApp.Commons.Intefaces;
 
 namespace RealWorldApp.DAL.Repositories
 {

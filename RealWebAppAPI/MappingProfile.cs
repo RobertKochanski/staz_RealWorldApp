@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using RealWorldApp.BAL.Models;
-using RealWorldApp.DAL.Entities;
+using RealWorldApp.Commons.Entities;
+using RealWorldApp.Commons.Models;
 
 namespace RealWebAppAPI
 {

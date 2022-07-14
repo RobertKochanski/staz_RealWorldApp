@@ -1,4 +1,4 @@
-﻿namespace RealWorldApp.DAL.Entities
+﻿namespace RealWorldApp.Commons.Entities
 {
     public class BaseEntitie
     {

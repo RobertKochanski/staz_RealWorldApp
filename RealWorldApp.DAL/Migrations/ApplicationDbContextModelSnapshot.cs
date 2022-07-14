@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using RealWebAppAPI.Data;
+using RealWorldApp.DAL;
 
 #nullable disable
 
@@ -17,7 +17,7 @@ namespace RealWorldApp.DAL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.6")
+                .HasAnnotation("ProductVersion", "6.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -300,7 +300,7 @@ namespace RealWorldApp.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("RealWorldApp.DAL.Entities.Article", b =>
+            modelBuilder.Entity("RealWorldApp.Commons.Entities.Article", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -339,7 +339,7 @@ namespace RealWorldApp.DAL.Migrations
                     b.ToTable("articles");
                 });
 
-            modelBuilder.Entity("RealWorldApp.DAL.Entities.Comment", b =>
+            modelBuilder.Entity("RealWorldApp.Commons.Entities.Comment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -364,7 +364,7 @@ namespace RealWorldApp.DAL.Migrations
                     b.ToTable("comments");
                 });
 
-            modelBuilder.Entity("RealWorldApp.DAL.Entities.Tag", b =>
+            modelBuilder.Entity("RealWorldApp.Commons.Entities.Tag", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -386,7 +386,7 @@ namespace RealWorldApp.DAL.Migrations
                     b.ToTable("tags");
                 });
 
-            modelBuilder.Entity("RealWorldApp.DAL.Entities.User", b =>
+            modelBuilder.Entity("RealWorldApp.Commons.Entities.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -482,7 +482,7 @@ namespace RealWorldApp.DAL.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("RealWorldApp.DAL.Entities.User", null)
+                    b.HasOne("RealWorldApp.Commons.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -491,7 +491,7 @@ namespace RealWorldApp.DAL.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("RealWorldApp.DAL.Entities.User", null)
+                    b.HasOne("RealWorldApp.Commons.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -506,7 +506,7 @@ namespace RealWorldApp.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RealWorldApp.DAL.Entities.User", null)
+                    b.HasOne("RealWorldApp.Commons.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -515,44 +515,44 @@ namespace RealWorldApp.DAL.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("RealWorldApp.DAL.Entities.User", null)
+                    b.HasOne("RealWorldApp.Commons.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RealWorldApp.DAL.Entities.Article", b =>
+            modelBuilder.Entity("RealWorldApp.Commons.Entities.Article", b =>
                 {
-                    b.HasOne("RealWorldApp.DAL.Entities.User", "User")
+                    b.HasOne("RealWorldApp.Commons.Entities.User", "User")
                         .WithMany("Articles")
                         .HasForeignKey("UserId1");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RealWorldApp.DAL.Entities.Comment", b =>
+            modelBuilder.Entity("RealWorldApp.Commons.Entities.Comment", b =>
                 {
-                    b.HasOne("RealWorldApp.DAL.Entities.Article", null)
+                    b.HasOne("RealWorldApp.Commons.Entities.Article", null)
                         .WithMany("Comments")
                         .HasForeignKey("ArticleId");
                 });
 
-            modelBuilder.Entity("RealWorldApp.DAL.Entities.Tag", b =>
+            modelBuilder.Entity("RealWorldApp.Commons.Entities.Tag", b =>
                 {
-                    b.HasOne("RealWorldApp.DAL.Entities.Article", null)
+                    b.HasOne("RealWorldApp.Commons.Entities.Article", null)
                         .WithMany("Tags")
                         .HasForeignKey("ArticleId");
                 });
 
-            modelBuilder.Entity("RealWorldApp.DAL.Entities.Article", b =>
+            modelBuilder.Entity("RealWorldApp.Commons.Entities.Article", b =>
                 {
                     b.Navigation("Comments");
 
                     b.Navigation("Tags");
                 });
 
-            modelBuilder.Entity("RealWorldApp.DAL.Entities.User", b =>
+            modelBuilder.Entity("RealWorldApp.Commons.Entities.User", b =>
                 {
                     b.Navigation("Articles");
                 });

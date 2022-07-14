@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace RealWorldApp.DAL.Entities
+namespace RealWorldApp.Commons.Entities
 {
     public class User : IdentityUser
     {

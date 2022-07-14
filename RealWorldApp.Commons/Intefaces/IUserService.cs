@@ -1,7 +1,7 @@
-﻿using RealWorldApp.BAL.Models;
+﻿using RealWorldApp.Commons.Models;
 using System.Security.Claims;
 
-namespace RealWorldApp.BAL.Services.Intefaces
+namespace RealWorldApp.Commons.Intefaces
 {
     public interface IUserService
     {

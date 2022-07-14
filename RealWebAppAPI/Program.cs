@@ -4,13 +4,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using RealWebAppAPI.Data;
 using RealWorldApp.BAL;
 using RealWorldApp.BAL.Services;
-using RealWorldApp.BAL.Services.Intefaces;
-using RealWorldApp.DAL.Entities;
+using RealWorldApp.Commons.Entities;
+using RealWorldApp.Commons.Intefaces;
+using RealWorldApp.DAL;
 using RealWorldApp.DAL.Repositories;
-using RealWorldApp.DAL.Repositories.Interfaces;
 using System.Text;
 
 namespace RealWebAppAPI

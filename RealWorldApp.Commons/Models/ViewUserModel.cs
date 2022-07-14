@@ -1,4 +1,4 @@
-﻿namespace RealWorldApp.BAL.Models
+﻿namespace RealWorldApp.Commons.Models
 {
     public class ViewUserModel
     {

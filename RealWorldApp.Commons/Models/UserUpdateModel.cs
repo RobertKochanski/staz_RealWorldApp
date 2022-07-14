@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RealWorldApp.BAL.Models
+﻿namespace RealWorldApp.Commons.Models
 {
     public class UserUpdateModelContainer
     {
@@ -18,6 +12,6 @@ namespace RealWorldApp.BAL.Models
         public string Email { get; set; }
         public string? Image { get; set; }
         public string Password { get; set; }
-        public string Token { get; set; } = String.Empty;
+        public string Token { get; set; } = string.Empty;
     }
 }
