@@ -2,9 +2,9 @@
 {
     public class BadRequestException : Exception
     {
-        public BadRequestException(string error)
+        public BadRequestException(string error):base(error)
         {
-            this.Data.Add("error", error);
+       
         }
     }
 }
