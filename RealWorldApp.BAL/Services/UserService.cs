@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RealWorldApp.Commons.Entities;
+using RealWorldApp.Commons.Exceptions;
 using RealWorldApp.Commons.Intefaces;
 using RealWorldApp.Commons.Models;
 using System.IdentityModel.Tokens.Jwt;
@@ -35,7 +36,7 @@ namespace RealWorldApp.BAL.Services
 
             if (user is null)
             {
-                throw new ArgumentNullException("Invalid username or password");
+                throw new BadRequestException("Invalid username or password");
             }
 
             if (!Password.Equals(user.PasswordHash))
@@ -44,7 +45,7 @@ namespace RealWorldApp.BAL.Services
 
                 if (result == PasswordVerificationResult.Failed)
                 {
-                    throw new Exception("Invalid username or password");
+                    throw new BadRequestException("Invalid username or password");
                 }
             }
             
@@ -82,7 +83,7 @@ namespace RealWorldApp.BAL.Services
 
             if (!result.Succeeded)
             {
-                throw new Exception("Something goes wrong!");
+                throw new BadRequestException("Something goes wrong!");
             }
             
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
@@ -99,6 +100,9 @@ namespace RealWorldApp.BAL.Services
         public async Task<UserResponseContainer> GetUserByEmail(string Email)
         {
             var user = await _userRepositorie.GetUserByEmail(Email);
+
+            throw new BadRequestException("Something goes wrong!");
+
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
 
             return userContainer;
@@ -106,7 +110,7 @@ namespace RealWorldApp.BAL.Services
 
         public async Task<UserResponseContainer> GetMyInfo(ClaimsPrincipal claims)
         {
-            var user = await _userRepositorie.GetUserById(claims.Identity.Name);
+            var user = await _userManager.FindByIdAsync(claims.Identity.Name);
             string token = await GenerateJwt(user.Email, user.PasswordHash);
 
             user.Token = token;
@@ -133,14 +137,10 @@ namespace RealWorldApp.BAL.Services
                 user.PasswordHash = _passwordHasher.HashPassword(user, request.User.Password);
             }
 
-            if (!String.IsNullOrEmpty(request.User.Image))
-            {
-                user.Image = request.User.Image;
-            }
-
             user.UserName = request.User.UserName;
             user.Bio = request.User.Bio;
             user.Email = request.User.Email;
+            user.Image = request.User.Image;
             user.Token = token;
 
             await _userManager.UpdateAsync(user);
