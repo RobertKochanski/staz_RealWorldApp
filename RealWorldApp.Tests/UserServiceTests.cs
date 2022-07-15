@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Moq;
 using RealWorldApp.BAL.Services;
 using RealWorldApp.Commons.Entities;
-using RealWorldApp.Commons.Intefaces;
 using RealWorldApp.Commons.Models;
 
 namespace RealWorldApp.Tests
@@ -18,7 +17,7 @@ namespace RealWorldApp.Tests
         }
 
         [Test]
-        public async Task Login_WithCorrectData_ReturnUserAsync()
+        public async Task Register_WithCorrectData_ReturnUserAsync()
         {
             //Arrange
             UserRegister user = new UserRegister()
@@ -30,7 +29,8 @@ namespace RealWorldApp.Tests
 
             UserResponse response = new UserResponse()
             {
-                
+                Username = "tester",
+                Email = "tester@tester.com"
             };
 
             UserResponseContainer expected = new UserResponseContainer()
@@ -42,7 +42,6 @@ namespace RealWorldApp.Tests
                 }
             };
 
-
             Mock<IMapper> mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<UserResponse>(It.IsAny<User>())).Returns(response);
 
@@ -51,13 +50,12 @@ namespace RealWorldApp.Tests
 
             var userService = new UserService(null, mockMapper.Object, null,null, userManager.Object);
 
-
             //Act
             var actual = await userService.AddUser(user);
 
             //Assert
             Assert.IsNotNull(actual);
-            mockMapper.Verify(x => x.Map<UserResponse>(user), Times.Once());
+            mockMapper.Verify(x => x.Map<UserResponse>(It.IsAny<User>()), Times.Once());
             Assert.That(actual.User.Username, Is.EqualTo(expected.User.Username));
         }
     }
