@@ -77,9 +77,7 @@ namespace RealWebAppAPI.Controllers
         [HttpPut("user")]
         public async Task<IActionResult> UpdateUser(UserUpdateModelContainer request)
         {
-            string token = this.Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-            UserResponseContainer user = await _userService.UpdateUser(request, User, token);
-            return Ok(user);
+            return Ok(await _userService.UpdateUser(request, User));
         }
     }
 }

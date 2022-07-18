@@ -7,7 +7,7 @@ namespace RealWorldApp.Commons.Intefaces
     {
         Task<List<ViewUserModel>> GetUsers();
         Task<UserResponseContainer> GetUserByEmail(string Email);
-        Task<UserResponseContainer> UpdateUser(UserUpdateModelContainer request, ClaimsPrincipal claims, string token);
+        Task<UserResponseContainer> UpdateUser(UserUpdateModelContainer request, ClaimsPrincipal claims);
         Task<UserResponseContainer> AddUser(UserRegister request);
         Task<string> GenerateJwt(string Email, string Password);
         Task<UserResponseContainer> GetMyInfo(ClaimsPrincipal claims);

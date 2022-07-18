@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using RealWorldApp.Commons.Entities;
 using RealWorldApp.Commons.Exceptions;
@@ -17,24 +18,26 @@ namespace RealWorldApp.BAL.Services
         private readonly IUserRepositorie _userRepositorie;
         private readonly IMapper _mapper;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly ILogger _logger;
         private readonly AuthenticationSettings _authenticationSettings;
         private readonly UserManager<User> _userManager;
 
-        public UserService(IUserRepositorie userRepositorie, IMapper mapper, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings, UserManager<User> userManager)
+        public UserService(IUserRepositorie userRepositorie, IMapper mapper, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings, UserManager<User> userManager, ILogger logger)
         {
             _userRepositorie = userRepositorie;
             _mapper = mapper;
             _passwordHasher = passwordHasher;
             _authenticationSettings = authenticationSettings;
             _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<string> GenerateJwt(string Email, string Password)
         {
-            var user = await _userRepositorie.GetUserByEmail(Email); // Wersja robocza
-            // var user = await _userManager.FindByEmailAsync(Email); // Wersja z userManager, nie działa XD
+            var user = await _userRepositorie.GetUserByEmail(Email);
+            //var user = await _userManager.FindByEmailAsync(Email);
 
-            if (user is null)
+            if (user == null)
             {
                 throw new BadRequestException("Invalid username or password");
             }
@@ -83,7 +86,7 @@ namespace RealWorldApp.BAL.Services
 
             if (!result.Succeeded)
             {
-                throw new BadRequestException("Something goes wrong!");
+                throw new BadRequestException("Can't create account with this data!");
             }
             
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
@@ -101,7 +104,10 @@ namespace RealWorldApp.BAL.Services
         {
             var user = await _userRepositorie.GetUserByEmail(Email);
 
-            throw new BadRequestException("Something goes wrong!");
+            if (user == null)
+            {
+                throw new BadRequestException("Something goes wrong!");
+            }
 
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
 
@@ -111,6 +117,12 @@ namespace RealWorldApp.BAL.Services
         public async Task<UserResponseContainer> GetMyInfo(ClaimsPrincipal claims)
         {
             var user = await _userManager.FindByIdAsync(claims.Identity.Name);
+
+            if (user == null)
+            {
+                throw new BadRequestException("Something goes wrong!");
+            }
+
             string token = await GenerateJwt(user.Email, user.PasswordHash);
 
             user.Token = token;
@@ -122,28 +134,51 @@ namespace RealWorldApp.BAL.Services
 
         public async Task<ProfileResponseContainer> GetProfile(string Username)
         {
-            var user = await _userRepositorie.GetUserByUsername(Username);
+            var user = await _userManager.FindByNameAsync(Username);
+
+            if (user == null)
+            {
+                throw new BadRequestException("Something goes wrong!");
+            }
+
             ProfileResponseContainer profileContainer = new ProfileResponseContainer() { Profile = _mapper.Map<ProfileResponse>(user) };
 
             return profileContainer;
         }
 
-        public async Task<UserResponseContainer> UpdateUser(UserUpdateModelContainer request, ClaimsPrincipal claims, string token)
+        public async Task<UserResponseContainer> UpdateUser(UserUpdateModelContainer request, ClaimsPrincipal claims)
         {
             var user = await _userManager.FindByIdAsync(claims.Identity.Name);
 
-            if (!String.IsNullOrEmpty(request.User.Password))
+            if (user == null)
+            {
+                throw new BadRequestException("Something goes wrong!");
+            }
+
+            if (!string.IsNullOrEmpty(request.User.Password))
             {
                 user.PasswordHash = _passwordHasher.HashPassword(user, request.User.Password);
             }
 
-            user.UserName = request.User.UserName;
-            user.Bio = request.User.Bio;
-            user.Email = request.User.Email;
-            user.Image = request.User.Image;
-            user.Token = token;
+            if (!string.IsNullOrEmpty(request.User.UserName))
+            {
+                user.UserName = request.User.UserName;
+            }
 
-            await _userManager.UpdateAsync(user);
+            if (!string.IsNullOrEmpty(request.User.Email))
+            {
+                user.Email = request.User.Email;
+            }
+            
+            user.Bio = request.User.Bio;
+            user.Image = request.User.Image;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                throw new BadRequestException("Can't update account with this data!");
+            }
 
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
 
