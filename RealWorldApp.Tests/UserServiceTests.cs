@@ -53,6 +53,7 @@ namespace RealWorldApp.Tests
             mockMapper.Setup(x => x.Map<UserResponse>(It.IsAny<User>())).Returns(response);
 
             Mock<UserManager<User>> userManager = GetMockUserManager();
+            userManager.Setup(x => x.FindByEmailAsync(user.Email)).ReturnsAsync(It.IsAny<User>());
             userManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success); 
 
             var userService = new UserService(mockMapper.Object, null, userManager.Object, null);
@@ -78,6 +79,8 @@ namespace RealWorldApp.Tests
                 Password = "test"
             };
 
+            IdentityResult result = new IdentityResult();
+
             Mock<UserManager<User>> userManager = GetMockUserManager();
             userManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Failed());
 
@@ -88,11 +91,8 @@ namespace RealWorldApp.Tests
             //Act
 
             //Assert
-            Assert.ThrowsAsync(Is.TypeOf<BadRequestException>().And.Message.EqualTo("Can't create account with this password!"), async delegate { await userService.AddUser(user); });
-
-            var actualEx = Assert.ThrowsAsync<BadRequestException>(async delegate { await userService.AddUser(user); });
-
-            Assert.That(actualEx.Message, Is.EqualTo("Can't create account with this password!"));
+            Assert.ThrowsAsync(Is.TypeOf<BadRequestException>()
+                .And.Message.EqualTo(string.Join(" ", result.Errors.Select(x => x.Description))), async delegate { await userService.AddUser(user); });
         }
 
         [Category("GetUserByEmail")]
@@ -160,7 +160,7 @@ namespace RealWorldApp.Tests
 
             //Assert
             Assert.ThrowsAsync(Is.TypeOf<BadRequestException>()
-                .And.Message.EqualTo("Something goes wrong!"), async delegate { await userService.GetUserByEmail("tezter@tester.com"); });
+                .And.Message.EqualTo("Can't find user"), async delegate { await userService.GetUserByEmail("tezter@tester.com"); });
         }
 
         [Category("GetProfile")]
@@ -227,7 +227,7 @@ namespace RealWorldApp.Tests
 
             //Assert
             Assert.ThrowsAsync(Is.TypeOf<BadRequestException>()
-                .And.Message.EqualTo("Something goes wrong!"), async delegate { await userService.GetProfile("Username"); });
+                .And.Message.EqualTo("Can't get your profile"), async delegate { await userService.GetProfile("Username"); });
         }
 
         [Category("GenerateJwt")]
@@ -438,7 +438,7 @@ namespace RealWorldApp.Tests
 
             //Assert
             Assert.ThrowsAsync(Is.TypeOf<BadRequestException>()
-                .And.Message.EqualTo("Something goes wrong!"), async delegate { await userService.UpdateUser(updateModel, claimsPrincipal); });
+                .And.Message.EqualTo("Can't find user"), async delegate { await userService.UpdateUser(updateModel, claimsPrincipal); });
         }
 
         [Category("UpdateUser")]
@@ -473,6 +473,8 @@ namespace RealWorldApp.Tests
             var identity = new ClaimsIdentity(claims, "TestAuthType");
             var claimsPrincipal = new ClaimsPrincipal(identity);
 
+            IdentityResult result = new IdentityResult();
+
             Mock<UserManager<User>> mockUserManager = GetMockUserManager();
             mockUserManager.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(userToChange);
             mockUserManager.Setup(x => x.UpdateAsync(It.IsAny<User>())).ReturnsAsync(IdentityResult.Failed());
@@ -488,7 +490,7 @@ namespace RealWorldApp.Tests
 
             //Assert
             Assert.ThrowsAsync(Is.TypeOf<BadRequestException>()
-                .And.Message.EqualTo("Can't update account with this data!"), async delegate { await userService.UpdateUser(updateModel, claimsPrincipal); });
+                .And.Message.EqualTo(string.Join(" ", result.Errors.Select(x => x.Description))), async delegate { await userService.UpdateUser(updateModel, claimsPrincipal); });
         }
     }
 }

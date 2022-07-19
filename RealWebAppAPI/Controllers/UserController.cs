@@ -42,18 +42,6 @@ namespace RealWebAppAPI.Controllers
             return Ok(user);
         }
 
-        [HttpGet("users")]
-        public async Task<IActionResult> GetUsers()
-        {
-            return Ok(await _userService.GetUsers());
-        }
-
-        [HttpGet("{Email}")]
-        public async Task<IActionResult> GetUserByEmail(string Email)
-        {
-            return Ok(await _userService.GetUserByEmail(Email));
-        }
-
         [HttpGet("user")]
         public async Task<IActionResult> GetMyInfo()
         {

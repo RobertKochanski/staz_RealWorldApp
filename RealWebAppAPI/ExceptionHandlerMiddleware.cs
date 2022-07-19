@@ -58,7 +58,6 @@ namespace RealWebAppAPI
                 error = exception.Message,
                 status,
                 timeStamp = DateTime.Now,
-                message = exception.Source + " error",
             };
 
             payload = JsonConvert.SerializeObject(response);

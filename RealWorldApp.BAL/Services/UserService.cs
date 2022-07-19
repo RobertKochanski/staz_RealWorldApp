@@ -76,17 +76,25 @@ namespace RealWorldApp.BAL.Services
             {
                 UserName = request.Username,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                Email = _userManager.NormalizeEmail(request.Email),
+                Email = request.Email,
             };
 
-            var passwordResult = await _userManager.CreateAsync(user, request.Password);
+            var emailResult = await _userManager.FindByEmailAsync(request.Email);
 
-            if (!passwordResult.Succeeded)
+            if (emailResult != null)
             {
-                _logger.LogError("Can't create account with this password!");
-                throw new BadRequestException("Can't create account with this password!");
+                _logger.LogError("User with this email already exist");
+                throw new ArgumentException("User with this email already exist");
             }
             
+            var result = await _userManager.CreateAsync(user, request.Password);
+
+            if (!result.Succeeded)
+            {
+                _logger.LogError(string.Join(", ", result.Errors.Select(x => x.Description)));
+                throw new BadRequestException(string.Join(" ", result.Errors.Select(x => x.Description)));
+            }
+
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
 
             return userContainer;
@@ -104,8 +112,8 @@ namespace RealWorldApp.BAL.Services
 
             if (user == null)
             {
-                _logger.LogError("Something goes wrong!");
-                throw new BadRequestException("Something goes wrong!");
+                _logger.LogError("Can't find user");
+                throw new BadRequestException("Can't find user");
             }
 
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
@@ -119,8 +127,8 @@ namespace RealWorldApp.BAL.Services
 
             if (user == null)
             {
-                _logger.LogError("Something goes wrong!");
-                throw new BadRequestException("Something goes wrong!");
+                _logger.LogError("Can't find your info");
+                throw new BadRequestException("Can't find your info");
             }
 
             string token = await GenerateJwt(user.Email, user.PasswordHash);
@@ -138,8 +146,8 @@ namespace RealWorldApp.BAL.Services
 
             if (user == null)
             {
-                _logger.LogError("Something goes wrong!");
-                throw new BadRequestException("Something goes wrong!");
+                _logger.LogError("Can't get your profile");
+                throw new BadRequestException("Can't get your profile");
             }
 
             ProfileResponseContainer profileContainer = new ProfileResponseContainer() { Profile = _mapper.Map<ProfileResponse>(user) };
@@ -153,13 +161,24 @@ namespace RealWorldApp.BAL.Services
 
             if (user == null)
             {
-                _logger.LogError("Something goes wrong!");
-                throw new BadRequestException("Something goes wrong!");
+                _logger.LogError("Can't find user");
+                throw new BadRequestException("Can't find user");
             }
 
             if (!string.IsNullOrEmpty(request.User.Password))
             {
-                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, request.User.Password);
+                var passwordValidator = new PasswordValidator<User>();
+                var passwordResult = await passwordValidator.ValidateAsync(_userManager, user, request.User.Password);
+
+                if (passwordResult.Succeeded)
+                {
+                    user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, request.User.Password);
+                }
+                else
+                {
+                    _logger.LogError(string.Join(", ", passwordResult.Errors.Select(x => x.Description)));
+                    throw new BadRequestException(string.Join(" ", passwordResult.Errors.Select(x => x.Description)));
+                }
             }
 
             if (!string.IsNullOrEmpty(request.User.UserName))
@@ -179,8 +198,8 @@ namespace RealWorldApp.BAL.Services
 
             if (!result.Succeeded)
             {
-                _logger.LogError("Can't update account with this data!");
-                throw new BadRequestException("Can't update account with this data!");
+                _logger.LogError(string.Join(", ", result.Errors.Select(x => x.Description)));
+                throw new BadRequestException(string.Join(" ", result.Errors.Select(x => x.Description)));
             }
 
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
