@@ -55,7 +55,7 @@ namespace RealWebAppAPI
 
             var response = new
             {
-                error = exception.Data["error"],
+                error = exception.Message,
                 status,
                 timeStamp = DateTime.Now,
                 message = exception.Source + " error",

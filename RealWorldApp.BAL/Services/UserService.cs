@@ -15,18 +15,14 @@ namespace RealWorldApp.BAL.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepositorie _userRepositorie;
         private readonly IMapper _mapper;
-        private readonly IPasswordHasher<User> _passwordHasher;
-        private readonly ILogger _logger;
+        private readonly ILogger<UserService> _logger;
         private readonly AuthenticationSettings _authenticationSettings;
         private readonly UserManager<User> _userManager;
 
-        public UserService(IUserRepositorie userRepositorie, IMapper mapper, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings, UserManager<User> userManager, ILogger logger)
+        public UserService(IMapper mapper, AuthenticationSettings authenticationSettings, UserManager<User> userManager, ILogger<UserService> logger)
         {
-            _userRepositorie = userRepositorie;
             _mapper = mapper;
-            _passwordHasher = passwordHasher;
             _authenticationSettings = authenticationSettings;
             _userManager = userManager;
             _logger = logger;
@@ -34,20 +30,21 @@ namespace RealWorldApp.BAL.Services
 
         public async Task<string> GenerateJwt(string Email, string Password)
         {
-            var user = await _userRepositorie.GetUserByEmail(Email);
-            //var user = await _userManager.FindByEmailAsync(Email);
+            var user = await _userManager.FindByEmailAsync(Email);
 
             if (user == null)
             {
+                _logger.LogError("Invalid username or password");
                 throw new BadRequestException("Invalid username or password");
             }
 
             if (!Password.Equals(user.PasswordHash))
             {
-                var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, Password);
+                var result = await _userManager.CheckPasswordAsync(user, Password);
 
-                if (result == PasswordVerificationResult.Failed)
+                if (!result)
                 {
+                    _logger.LogError("Invalid username or password");
                     throw new BadRequestException("Invalid username or password");
                 }
             }
@@ -77,16 +74,17 @@ namespace RealWorldApp.BAL.Services
         {
             User user = new User()
             {
-                Email = request.Email,
                 UserName = request.Username,
                 SecurityStamp = Guid.NewGuid().ToString(),
+                Email = _userManager.NormalizeEmail(request.Email),
             };
 
-            var result = await _userManager.CreateAsync(user, request.Password);
+            var passwordResult = await _userManager.CreateAsync(user, request.Password);
 
-            if (!result.Succeeded)
+            if (!passwordResult.Succeeded)
             {
-                throw new BadRequestException("Can't create account with this data!");
+                _logger.LogError("Can't create account with this password!");
+                throw new BadRequestException("Can't create account with this password!");
             }
             
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
@@ -102,10 +100,11 @@ namespace RealWorldApp.BAL.Services
 
         public async Task<UserResponseContainer> GetUserByEmail(string Email)
         {
-            var user = await _userRepositorie.GetUserByEmail(Email);
+            var user = await _userManager.FindByEmailAsync(Email);
 
             if (user == null)
             {
+                _logger.LogError("Something goes wrong!");
                 throw new BadRequestException("Something goes wrong!");
             }
 
@@ -120,6 +119,7 @@ namespace RealWorldApp.BAL.Services
 
             if (user == null)
             {
+                _logger.LogError("Something goes wrong!");
                 throw new BadRequestException("Something goes wrong!");
             }
 
@@ -138,6 +138,7 @@ namespace RealWorldApp.BAL.Services
 
             if (user == null)
             {
+                _logger.LogError("Something goes wrong!");
                 throw new BadRequestException("Something goes wrong!");
             }
 
@@ -152,12 +153,13 @@ namespace RealWorldApp.BAL.Services
 
             if (user == null)
             {
+                _logger.LogError("Something goes wrong!");
                 throw new BadRequestException("Something goes wrong!");
             }
 
             if (!string.IsNullOrEmpty(request.User.Password))
             {
-                user.PasswordHash = _passwordHasher.HashPassword(user, request.User.Password);
+                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, request.User.Password);
             }
 
             if (!string.IsNullOrEmpty(request.User.UserName))
@@ -177,6 +179,7 @@ namespace RealWorldApp.BAL.Services
 
             if (!result.Succeeded)
             {
+                _logger.LogError("Can't update account with this data!");
                 throw new BadRequestException("Can't update account with this data!");
             }
 

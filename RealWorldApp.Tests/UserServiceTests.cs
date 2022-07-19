@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using RealWorldApp.BAL;
 using RealWorldApp.BAL.Services;
@@ -54,7 +55,7 @@ namespace RealWorldApp.Tests
             Mock<UserManager<User>> userManager = GetMockUserManager();
             userManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success); 
 
-            var userService = new UserService(null, mockMapper.Object, null,null, userManager.Object);
+            var userService = new UserService(mockMapper.Object, null, userManager.Object, null);
 
             //Act
             var actual = await userService.AddUser(user);
@@ -80,16 +81,18 @@ namespace RealWorldApp.Tests
             Mock<UserManager<User>> userManager = GetMockUserManager();
             userManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Failed());
 
-            var userService = new UserService(null, null, null, null, userManager.Object);
+            Mock<ILogger<UserService>> mockLogger = new Mock<ILogger<UserService>>();
+
+            var userService = new UserService(null, null, userManager.Object, mockLogger.Object);
 
             //Act
 
             //Assert
-            Assert.ThrowsAsync(Is.TypeOf<BadRequestException>().And.Message.EqualTo("Can't create account with this data!"), async delegate { await userService.AddUser(user); });
+            Assert.ThrowsAsync(Is.TypeOf<BadRequestException>().And.Message.EqualTo("Can't create account with this password!"), async delegate { await userService.AddUser(user); });
 
             var actualEx = Assert.ThrowsAsync<BadRequestException>(async delegate { await userService.AddUser(user); });
 
-            Assert.That(actualEx.Message, Is.EqualTo("Can't create account with this data!"));
+            Assert.That(actualEx.Message, Is.EqualTo("Can't create account with this password!"));
         }
 
         [Category("GetUserByEmail")]
@@ -118,13 +121,15 @@ namespace RealWorldApp.Tests
                 }
             };
 
-            Mock<IUserRepositorie> mockRepositorie = new Mock<IUserRepositorie>();
-            mockRepositorie.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(user);
+            Mock<UserManager<User>> mockUserManager = GetMockUserManager();
+            mockUserManager.Setup(x => x.FindByEmailAsync(user.Email)).ReturnsAsync(user);
 
             Mock<IMapper> mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<UserResponse>(It.IsAny<User>())).Returns(response);
 
-            var userService = new UserService(mockRepositorie.Object, mockMapper.Object, null, null, null);
+            Mock<ILogger<UserService>> mockLogger = new Mock<ILogger<UserService>>();
+
+            var userService = new UserService(mockMapper.Object, null, mockUserManager.Object, mockLogger.Object);
 
             //Act
             var actual = await userService.GetUserByEmail("tester@tester.com");
@@ -144,10 +149,12 @@ namespace RealWorldApp.Tests
             //Arrange
             User user = null;
 
-            Mock<IUserRepositorie> mockRepositorie = new Mock<IUserRepositorie>();
-            mockRepositorie.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(user);
+            Mock<UserManager<User>> mockUserManager = GetMockUserManager();
+            mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(user);
 
-            var userService = new UserService(mockRepositorie.Object, null, null, null, null);
+            Mock<ILogger<UserService>> mockLogger = new Mock<ILogger<UserService>>();
+
+            var userService = new UserService(null, null, mockUserManager.Object, mockLogger.Object);
 
             //Act
 
@@ -191,7 +198,7 @@ namespace RealWorldApp.Tests
             Mock<IMapper> mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<ProfileResponse>(It.IsAny<User>())).Returns(response);
 
-            var userService = new UserService(null, mockMapper.Object, null, null, mockUserManager.Object);
+            var userService = new UserService(mockMapper.Object, null, mockUserManager.Object, null);
 
             //Act
             var actual = await userService.GetProfile("tester");
@@ -212,7 +219,9 @@ namespace RealWorldApp.Tests
             Mock<UserManager<User>> mockUserManager = GetMockUserManager();
             mockUserManager.Setup(x => x.FindByNameAsync(It.IsAny<string>())).ReturnsAsync(user);
 
-            var userService = new UserService(null, null, null, null, mockUserManager.Object);
+            Mock<ILogger<UserService>> mockLogger = new Mock<ILogger<UserService>>();
+
+            var userService = new UserService(null, null, mockUserManager.Object, mockLogger.Object);
 
             //Act
 
@@ -245,13 +254,11 @@ namespace RealWorldApp.Tests
                 JwtIssuer = "http://localhost:47765"
             };
 
-            Mock<IUserRepositorie> mockRepositorie = new Mock<IUserRepositorie>();
-            mockRepositorie.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(user);
+            Mock<UserManager<User>> mockUserManager = GetMockUserManager();
+            mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(user);
+            mockUserManager.Setup(x => x.CheckPasswordAsync(user, userLogin.Password)).ReturnsAsync(true);
 
-            Mock<IPasswordHasher<User>> mockPasswordHasher = new Mock<IPasswordHasher<User>>();
-            mockPasswordHasher.Setup(x => x.VerifyHashedPassword(user, user.PasswordHash, userLogin.Password)).Returns(PasswordVerificationResult.Success);            
-
-            var userService = new UserService(mockRepositorie.Object, null, mockPasswordHasher.Object, authenticationSettings, null);
+            var userService = new UserService(null, authenticationSettings, mockUserManager.Object, null);
 
             //Act
             var actual = await userService.GenerateJwt(userLogin.Email, userLogin.Password);
@@ -273,10 +280,12 @@ namespace RealWorldApp.Tests
 
             User user = null;
 
-            Mock<IUserRepositorie> mockRepositorie = new Mock<IUserRepositorie>();
-            mockRepositorie.Setup(x => x.GetUserByEmail(It.IsAny<string>())).ReturnsAsync(user);
+            Mock<UserManager<User>> mockUserManager = GetMockUserManager();
+            mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(user);
 
-            var userService = new UserService(mockRepositorie.Object, null, null, null, null);
+            Mock<ILogger<UserService>> mockLogger = new Mock<ILogger<UserService>>();
+
+            var userService = new UserService(null, null, mockUserManager.Object, mockLogger.Object);
 
             //Act
 
@@ -305,10 +314,12 @@ namespace RealWorldApp.Tests
             Mock<IUserRepositorie> mockRepositorie = new Mock<IUserRepositorie>();
             mockRepositorie.Setup(x => x.GetUserByEmail(userLogin.Email)).ReturnsAsync(user);
 
-            Mock<IPasswordHasher<User>> mockPasswordHasher = new Mock<IPasswordHasher<User>>();
-            mockPasswordHasher.Setup(x => x.VerifyHashedPassword(user, user.PasswordHash, userLogin.Password)).Returns(PasswordVerificationResult.Failed);
+            Mock<UserManager<User>> mockUserManager = GetMockUserManager();
+            mockUserManager.Setup(x => x.CheckPasswordAsync(user, userLogin.Password));
 
-            var userService = new UserService(mockRepositorie.Object, null, mockPasswordHasher.Object, null, null);
+            Mock<ILogger<UserService>> mockLogger = new Mock<ILogger<UserService>>();
+
+            var userService = new UserService(null, null, mockUserManager.Object, mockLogger.Object);
 
             //Act
 
@@ -378,7 +389,7 @@ namespace RealWorldApp.Tests
             Mock<IMapper> mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<UserResponse>(It.IsAny<User>())).Returns(response);
 
-            var userService = new UserService(null, mockMapper.Object, mockPasswordHasher.Object, null, mockUserManager.Object);
+            var userService = new UserService(mockMapper.Object, null, mockUserManager.Object, null);
 
             //Act
             var actual = userService.UpdateUser(updateModel, claimsPrincipal);
@@ -419,7 +430,9 @@ namespace RealWorldApp.Tests
             Mock<UserManager<User>> mockUserManager = GetMockUserManager();
             mockUserManager.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(userToChange);
 
-            var userService = new UserService(null, null, null, null, mockUserManager.Object);
+            Mock<ILogger<UserService>> mockLogger = new Mock<ILogger<UserService>>();
+
+            var userService = new UserService(null, null, mockUserManager.Object, mockLogger.Object);
 
             //Act
 
@@ -467,7 +480,9 @@ namespace RealWorldApp.Tests
             Mock<IPasswordHasher<User>> mockPasswordHasher = new Mock<IPasswordHasher<User>>();
             mockPasswordHasher.Setup(x => x.HashPassword(It.IsAny<User>(), It.IsAny<string>())).Returns(userToChange.PasswordHash);
 
-            var userService = new UserService(null, null, mockPasswordHasher.Object, null, mockUserManager.Object);
+            Mock<ILogger<UserService>> mockLogger = new Mock<ILogger<UserService>>();
+
+            var userService = new UserService(null, null, mockUserManager.Object, mockLogger.Object);
 
             //Act
 
