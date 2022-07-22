@@ -67,6 +67,10 @@ namespace RealWebAppAPI
 
             builder.Services.AddScoped<IUserRepositorie, UserRepositorie>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IArticleRepositorie, ArticleRepositorie>();
+            builder.Services.AddScoped<IArticleService, ArticleService>();
+            builder.Services.AddScoped<ICommentRepositorie, CommentRepositorie>();
+            builder.Services.AddScoped<ICommentService, CommentService>();
 
             builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 

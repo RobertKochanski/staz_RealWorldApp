@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using RealWorldApp.Commons.Entities;
 using RealWorldApp.Commons.Exceptions;
 using RealWorldApp.Commons.Intefaces;
-using RealWorldApp.Commons.Models;
+using RealWorldApp.Commons.Models.UserModel;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -140,9 +140,10 @@ namespace RealWorldApp.BAL.Services
             return userContainer;
         }
 
-        public async Task<ProfileResponseContainer> GetProfile(string Username)
+        public async Task<ProfileResponseContainer> GetProfile(string Username, ClaimsPrincipal claims)
         {
             var user = await _userManager.FindByNameAsync(Username);
+            var actualUser = await _userManager.FindByIdAsync(claims.Identity.Name);
 
             if (user == null)
             {
@@ -151,6 +152,11 @@ namespace RealWorldApp.BAL.Services
             }
 
             ProfileResponseContainer profileContainer = new ProfileResponseContainer() { Profile = _mapper.Map<ProfileResponse>(user) };
+
+            if (actualUser.FollowedUsers.Contains(user))
+            {
+                profileContainer.Profile.following = true;
+            }
 
             return profileContainer;
         }
@@ -205,6 +211,52 @@ namespace RealWorldApp.BAL.Services
             UserResponseContainer userContainer = new UserResponseContainer() { User = _mapper.Map<UserResponse>(user) };
 
             return userContainer;
+        }
+
+        public async Task<ProfileResponseContainer> AddFollow(string Username, ClaimsPrincipal claims)
+        {
+            var userToFollow = await _userManager.FindByNameAsync(Username);
+            var actualUser = await _userManager.FindByIdAsync(claims.Identity.Name);
+
+            if (userToFollow == null)
+            {
+                _logger.LogError("Can't find user profile");
+                throw new BadRequestException("Can't find user profile");
+            }
+
+            ProfileResponseContainer profileContainer = new ProfileResponseContainer() { Profile = _mapper.Map<ProfileResponse>(userToFollow) };
+
+            if (!actualUser.FollowedUsers.Contains(userToFollow))
+            {
+                actualUser.FollowedUsers.Add(userToFollow);
+                await _userManager.UpdateAsync(actualUser);
+                profileContainer.Profile.following = true;
+            }
+
+            return profileContainer;
+        }
+
+        public async Task<ProfileResponseContainer> UnFollow(string Username, ClaimsPrincipal claims)
+        {
+            var userToFollow = await _userManager.FindByNameAsync(Username);
+            var actualUser = await _userManager.FindByIdAsync(claims.Identity.Name);
+
+            if (userToFollow == null)
+            {
+                _logger.LogError("Can't find user profile");
+                throw new BadRequestException("Can't find user profile");
+            }
+
+            ProfileResponseContainer profileContainer = new ProfileResponseContainer() { Profile = _mapper.Map<ProfileResponse>(userToFollow) };
+
+            if (actualUser.FollowedUsers.Contains(userToFollow))
+            {
+                actualUser.FollowedUsers.Remove(userToFollow);
+                await _userManager.UpdateAsync(actualUser);
+                profileContainer.Profile.following = false;
+            }
+
+            return profileContainer;
         }
     }
 }

@@ -1,6 +1,5 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using RealWorldApp.BAL;
@@ -8,7 +7,7 @@ using RealWorldApp.BAL.Services;
 using RealWorldApp.Commons.Entities;
 using RealWorldApp.Commons.Exceptions;
 using RealWorldApp.Commons.Intefaces;
-using RealWorldApp.Commons.Models;
+using RealWorldApp.Commons.Models.UserModel;
 using System.Security.Claims;
 
 namespace RealWorldApp.Tests
@@ -192,6 +191,14 @@ namespace RealWorldApp.Tests
                 }
             };
 
+            var claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.Name, "tester"),
+                new Claim(ClaimTypes.Email, "tester@test.com")
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+
             Mock<UserManager<User>> mockUserManager = GetMockUserManager();
             mockUserManager.Setup(x => x.FindByNameAsync(It.IsAny<string>())).ReturnsAsync(user);
 
@@ -201,7 +208,7 @@ namespace RealWorldApp.Tests
             var userService = new UserService(mockMapper.Object, null, mockUserManager.Object, null);
 
             //Act
-            var actual = await userService.GetProfile("tester");
+            var actual = await userService.GetProfile("tester", claimsPrincipal);
 
             //Assert
             Assert.IsNotNull(actual);
@@ -216,6 +223,14 @@ namespace RealWorldApp.Tests
             //Arrange
             User user = null;
 
+            var claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.Name, "tester"),
+                new Claim(ClaimTypes.Email, "tester@test.com")
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+
             Mock<UserManager<User>> mockUserManager = GetMockUserManager();
             mockUserManager.Setup(x => x.FindByNameAsync(It.IsAny<string>())).ReturnsAsync(user);
 
@@ -227,7 +242,7 @@ namespace RealWorldApp.Tests
 
             //Assert
             Assert.ThrowsAsync(Is.TypeOf<BadRequestException>()
-                .And.Message.EqualTo("Can't get your profile"), async delegate { await userService.GetProfile("Username"); });
+                .And.Message.EqualTo("Can't get your profile"), async delegate { await userService.GetProfile("Username", claimsPrincipal); });
         }
 
         [Category("GenerateJwt")]

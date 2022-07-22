@@ -1,4 +1,4 @@
-﻿using RealWorldApp.Commons.Models;
+﻿using RealWorldApp.Commons.Models.UserModel;
 using System.Security.Claims;
 
 namespace RealWorldApp.Commons.Intefaces
@@ -11,7 +11,10 @@ namespace RealWorldApp.Commons.Intefaces
         Task<UserResponseContainer> AddUser(UserRegister request);
         Task<string> GenerateJwt(string Email, string Password);
         Task<UserResponseContainer> GetMyInfo(ClaimsPrincipal claims);
-        Task<ProfileResponseContainer> GetProfile(string Username);
+        Task<ProfileResponseContainer> GetProfile(string Username, ClaimsPrincipal claims);
+        Task<ProfileResponseContainer> AddFollow(string Username, ClaimsPrincipal claims);
+        Task<ProfileResponseContainer> UnFollow(string Username, ClaimsPrincipal claims);
+
     }
 }
 

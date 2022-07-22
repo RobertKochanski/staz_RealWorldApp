@@ -2,17 +2,18 @@
 {
     public class Article : BaseEntitie
     {
+        public string Slug { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string ArticleText { get; set; }
-        public DateTime PublicDate { get; set; }
-        public int FaroritesCount { get; set; }
+        public string Body { get; set; }
+        public bool Favorited { get; set; } = false;
+        public int FavoritesCount { get; set; } = 0;
+        public DateTime CreateDate { get; set; }
+        public DateTime UpdateDate { get; set; }
 
-        public ICollection<Tag> Tags { get; set; }
+        public User Author { get; set; }
 
-        public int UserId { get; set; }
-        public User User { get; set; }
-
-        public ICollection<Comment> Comments { get; set; }
+        public ICollection<Tag> TagList { get; set; } = new List<Tag>();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
 }

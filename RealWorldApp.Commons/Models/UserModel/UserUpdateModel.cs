@@ -1,4 +1,4 @@
-﻿namespace RealWorldApp.Commons.Models
+﻿namespace RealWorldApp.Commons.Models.UserModel
 {
     public class UserUpdateModelContainer
     {

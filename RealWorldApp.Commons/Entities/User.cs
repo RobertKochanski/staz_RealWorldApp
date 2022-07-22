@@ -8,6 +8,9 @@ namespace RealWorldApp.Commons.Entities
         public string? Bio { get; set; }
         public string? Token { get; set; }
 
-        public ICollection<Article> Articles { get; set; }
+        public ICollection<Article> Articles { get; set; } = new List<Article>();
+        public ICollection<Article> FavoriteArticles { get; set; } = new List<Article>();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<User> FollowedUsers { get; set; } = new List<User>();
     }
 }

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using RealWorldApp.Commons.Intefaces;
-using RealWorldApp.Commons.Models;
+using RealWorldApp.Commons.Models.UserModel;
 
 namespace RealWebAppAPI.Controllers
 {
@@ -56,16 +56,29 @@ namespace RealWebAppAPI.Controllers
             return Ok(user);
         }
 
-        [HttpGet("profiles/{Username}")]
-        public async Task<IActionResult> GetProfile([FromRoute]string Username)
-        {
-            return Ok(await _userService.GetProfile(Username));
-        }
-
         [HttpPut("user")]
         public async Task<IActionResult> UpdateUser(UserUpdateModelContainer request)
         {
             return Ok(await _userService.UpdateUser(request, User));
+        }
+
+        [AllowAnonymous]
+        [HttpGet("profiles/{Username}")]
+        public async Task<IActionResult> GetProfile([FromRoute] string Username)
+        {
+            return Ok(await _userService.GetProfile(Username, User));
+        }
+
+        [HttpPost("profiles/{Username}/follow")]
+        public async Task<IActionResult> AddFollow([FromRoute] string Username)
+        {
+            return Ok(await _userService.AddFollow(Username, User));
+        }
+
+        [HttpDelete("profiles/{Username}/follow")]
+        public async Task<IActionResult> UnFollow([FromRoute] string Username)
+        {
+            return Ok(await _userService.UnFollow(Username, User));
         }
     }
 }
