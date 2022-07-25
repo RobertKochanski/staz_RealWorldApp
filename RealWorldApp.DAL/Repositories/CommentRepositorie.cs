@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RealWorldApp.Commons.Entities;
 using RealWorldApp.Commons.Intefaces;
-using RealWorldApp.Commons.Models.CommentModel;
 
 namespace RealWorldApp.DAL.Repositories
 {

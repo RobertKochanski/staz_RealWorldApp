@@ -9,6 +9,6 @@ namespace RealWorldApp.Commons.Intefaces
         Task<List<Article>> GetAllArticleForUser(User user, int limit, int offset);
         Task<Article> GetArticleBySlug(string slug);
         void DeleteArticle(Article article);
-        Task SaveChangesAsync();
+        Task SaveChangesAsync(Article article);
     }
 }

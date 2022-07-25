@@ -1,11 +1,10 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace RealWorldApp.DAL.Migrations
 {
-    public partial class initial : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -112,6 +111,19 @@ namespace RealWorldApp.DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PersistedGrants", x => x.Key);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "tags",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tags", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -254,6 +266,30 @@ namespace RealWorldApp.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ArticleTag",
+                columns: table => new
+                {
+                    ArticlesId = table.Column<int>(type: "int", nullable: false),
+                    TagListId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ArticleTag", x => new { x.ArticlesId, x.TagListId });
+                    table.ForeignKey(
+                        name: "FK_ArticleTag_articles_ArticlesId",
+                        column: x => x.ArticlesId,
+                        principalTable: "articles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ArticleTag_tags_TagListId",
+                        column: x => x.TagListId,
+                        principalTable: "tags",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "comments",
                 columns: table => new
                 {
@@ -281,25 +317,6 @@ namespace RealWorldApp.DAL.Migrations
                         principalColumn: "Id");
                 });
 
-            migrationBuilder.CreateTable(
-                name: "tags",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ArticleId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_tags", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_tags_articles_ArticleId",
-                        column: x => x.ArticleId,
-                        principalTable: "articles",
-                        principalColumn: "Id");
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_articles_AuthorId",
                 table: "articles",
@@ -315,6 +332,11 @@ namespace RealWorldApp.DAL.Migrations
                 name: "IX_articles_UserId",
                 table: "articles",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ArticleTag_TagListId",
+                table: "ArticleTag",
+                column: "TagListId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -423,15 +445,13 @@ namespace RealWorldApp.DAL.Migrations
                 name: "IX_PersistedGrants_SubjectId_SessionId_Type",
                 table: "PersistedGrants",
                 columns: new[] { "SubjectId", "SessionId", "Type" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_tags_ArticleId",
-                table: "tags",
-                column: "ArticleId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ArticleTag");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 

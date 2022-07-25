@@ -55,6 +55,16 @@ namespace RealWorldApp.DAL
                 .HasIndex(a => a.Title)
                 .IsUnique();
 
+            // COMMENTS
+            modelBuilder.Entity<Comment>()
+                .Property(c => c.Body)
+                .IsRequired();
+
+            // TAGS
+            modelBuilder.Entity<Tag>()
+                .Property(t => t.Name)
+                .IsRequired();
+
             base.OnModelCreating(modelBuilder);
         }
     }

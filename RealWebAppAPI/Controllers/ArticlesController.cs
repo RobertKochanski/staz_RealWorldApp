@@ -28,7 +28,7 @@ namespace RealWebAppAPI.Controllers
         [HttpGet("articles")]
         public async Task<IActionResult> GetArticles([FromQuery]string? author, [FromQuery]string? favorited, [FromQuery]int limit, [FromQuery]int offset)
         {
-            return Ok(await _articleService.GetArticles(author, favorited, limit, offset));
+            return Ok(await _articleService.GetArticles(author, favorited, limit, offset, User));
         }
 
         [AllowAnonymous]
@@ -39,9 +39,9 @@ namespace RealWebAppAPI.Controllers
         }
 
         [HttpGet("articles/feed")]
-        public async Task<IActionResult> GetArticleFeed([FromRoute] string feed, [FromQuery] int limit, [FromQuery] int offset)
+        public async Task<IActionResult> GetArticleFeed([FromQuery] int limit, [FromQuery] int offset)
         {
-            return Ok();
+            return Ok(await _articleService.GetArticleFeed(limit, offset, User));
         }
 
         [HttpDelete("articles/{slug}")]
@@ -56,6 +56,18 @@ namespace RealWebAppAPI.Controllers
         public async Task<IActionResult> UpdateArticle([FromRoute] string slug, CreateUpdateArticleModelContainer updateModel)
         {
             return Ok(await _articleService.UpdateArticle(slug, updateModel));
+        }
+
+        [HttpPost("articles/{slug}/favorite")]
+        public async Task<IActionResult> AddFavorite([FromRoute] string slug)
+        {
+            return Ok(await _articleService.AddFavorite(slug, User));
+        }
+
+        [HttpDelete("articles/{slug}/favorite")]
+        public async Task<IActionResult> UnFavorite([FromRoute] string slug)
+        {
+            return Ok(await _articleService.UnFavorite(slug, User));
         }
     }
 }

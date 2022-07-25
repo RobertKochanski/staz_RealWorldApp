@@ -1,6 +1,4 @@
-﻿using RealWorldApp.Commons.Entities;
-
-namespace RealWorldApp.Commons.Models.ArticleModel
+﻿namespace RealWorldApp.Commons.Models.ArticleModel
 {
     public class ArticleResponseModelContainer
     {
@@ -19,11 +17,11 @@ namespace RealWorldApp.Commons.Models.ArticleModel
         public string Title { get; set; }
         public string Description { get; set; }
         public string Body { get; set; }
-        public ICollection<Tag> TagList { get; set; }
+        public List<string> TagList { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdateAt { get; set; }
         public bool Favorited { get; set; }
-        public int FavoritedCount { get; set; }
+        public int FavoritesCount { get; set; }
         public UserArticleResponseModel Author { get; set; }
     }
 }

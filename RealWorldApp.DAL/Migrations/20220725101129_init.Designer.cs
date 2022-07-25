@@ -12,8 +12,8 @@ using RealWorldApp.DAL;
 namespace RealWorldApp.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220722072208_initial")]
-    partial class initial
+    [Migration("20220725101129_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,6 +23,21 @@ namespace RealWorldApp.DAL.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("ArticleTag", b =>
+                {
+                    b.Property<int>("ArticlesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TagListId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ArticlesId", "TagListId");
+
+                    b.HasIndex("TagListId");
+
+                    b.ToTable("ArticleTag");
+                });
 
             modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.DeviceFlowCodes", b =>
                 {
@@ -398,16 +413,11 @@ namespace RealWorldApp.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("ArticleId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ArticleId");
 
                     b.ToTable("tags");
                 });
@@ -502,6 +512,21 @@ namespace RealWorldApp.DAL.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("ArticleTag", b =>
+                {
+                    b.HasOne("RealWorldApp.Commons.Entities.Article", null)
+                        .WithMany()
+                        .HasForeignKey("ArticlesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RealWorldApp.Commons.Entities.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -585,13 +610,6 @@ namespace RealWorldApp.DAL.Migrations
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("RealWorldApp.Commons.Entities.Tag", b =>
-                {
-                    b.HasOne("RealWorldApp.Commons.Entities.Article", null)
-                        .WithMany("TagList")
-                        .HasForeignKey("ArticleId");
-                });
-
             modelBuilder.Entity("RealWorldApp.Commons.Entities.User", b =>
                 {
                     b.HasOne("RealWorldApp.Commons.Entities.User", null)
@@ -602,8 +620,6 @@ namespace RealWorldApp.DAL.Migrations
             modelBuilder.Entity("RealWorldApp.Commons.Entities.Article", b =>
                 {
                     b.Navigation("Comments");
-
-                    b.Navigation("TagList");
                 });
 
             modelBuilder.Entity("RealWorldApp.Commons.Entities.User", b =>

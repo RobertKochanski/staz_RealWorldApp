@@ -1,6 +1,4 @@
-﻿using RealWorldApp.Commons.Entities;
-
-namespace RealWorldApp.Commons.Models.ArticleModel
+﻿namespace RealWorldApp.Commons.Models.ArticleModel
 {
     public class CreateUpdateArticleModelContainer
     {
@@ -12,6 +10,6 @@ namespace RealWorldApp.Commons.Models.ArticleModel
         public string Title { get; set; }
         public string Description { get; set; }
         public string Body { get; set; }
-        public ICollection<Tag> TagList { get; set; }
+        public List<string> TagList { get; set; } = new List<string>();
     }
 }

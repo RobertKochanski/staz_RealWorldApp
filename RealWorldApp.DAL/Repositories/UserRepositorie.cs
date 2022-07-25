@@ -25,7 +25,7 @@ namespace RealWorldApp.DAL.Repositories
 
         public async Task<User> GetUserById(string Id)
         {
-            return await _context.users.Where(x => x.Id == Id).FirstOrDefaultAsync();
+            return await _context.users.Where(x => x.Id == Id).Include(x => x.FollowedUsers).Include(x => x.FavoriteArticles).FirstOrDefaultAsync();
         }
 
         public async Task<User> GetUserByUsername(string Username)

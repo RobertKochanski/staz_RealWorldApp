@@ -17,7 +17,8 @@ namespace RealWebAppAPI
             CreateMap<Article, ArticleResponseModel>()
                 .ForMember(x => x.CreatedAt, opt => opt.MapFrom(x => x.CreateDate))
                 .ForMember(x => x.UpdateAt, opt => opt.MapFrom(x => x.UpdateDate))
-                .ForMember(x => x.Author, opt => opt.MapFrom(x => x.Author));
+                .ForMember(x => x.Author, opt => opt.MapFrom(x => x.Author))
+                .ForMember(x => x.TagList, opt => opt.MapFrom(x => x.TagList.Select(x => x.Name)));
 
             CreateMap<User, UserArticleResponseModel>();
             

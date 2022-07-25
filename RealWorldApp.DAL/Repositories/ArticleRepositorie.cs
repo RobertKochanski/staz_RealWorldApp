@@ -23,9 +23,10 @@ namespace RealWorldApp.DAL.Repositories
         {
             return await _context.articles
                 .OrderByDescending(x => x.CreateDate)
-                .Skip(limit * offset)
+                .Skip(limit * offset + offset)
                 .Take(limit)
                 .Include(x => x.Author)
+                .Include(x => x.TagList)
                 .ToListAsync();
         }
 
@@ -33,9 +34,10 @@ namespace RealWorldApp.DAL.Repositories
         {
             return await _context.articles
                 .Include(x => x.Author)
+                .Include(x => x.TagList)
                 .Where(x => x.Author.UserName == user.UserName)
                 .OrderByDescending(x => x.CreateDate)
-                .Skip(limit * offset)
+                .Skip(limit * offset + offset)
                 .Take(limit)
                 .ToListAsync();
         }
@@ -44,6 +46,7 @@ namespace RealWorldApp.DAL.Repositories
         {
             return await _context.articles
                 .Include(a => a.Author)
+                .Include(x => x.TagList)
                 .Where(x => x.Slug == slug)
                 .FirstOrDefaultAsync();
         }
@@ -54,8 +57,9 @@ namespace RealWorldApp.DAL.Repositories
             _context.SaveChanges();
         }
 
-        public async Task SaveChangesAsync()
+        public async Task SaveChangesAsync(Article article)
         {
+            _context.articles.Update(article);
             await _context.SaveChangesAsync();
         }
     }
