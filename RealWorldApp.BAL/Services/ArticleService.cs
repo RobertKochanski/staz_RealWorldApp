@@ -58,12 +58,28 @@ namespace RealWorldApp.BAL.Services
             return articleContainer;
         }
 
-        public async Task<ArticleResponseModelContainerList> GetArticles(string? author, string? favorited, int limit, int offset, ClaimsPrincipal claims)
+        public async Task<ArticleResponseModelContainerList> GetArticles(string? author, string? favorited, string? tag, int limit, int offset, ClaimsPrincipal claims)
         {
             User user = (User)null;
             List<Article> articlesList = new List<Article>();
+            var actualUser = await _userRepositorie.GetUserById(claims.Identity.Name);
 
-            if (!string.IsNullOrEmpty(favorited))
+
+            if (!string.IsNullOrEmpty(tag))
+            {
+                var allArticle = await _articleRepositorie.GetAllArticleForTag();
+                foreach (var article in allArticle)
+                {
+                    foreach (var articleTag in article.TagList)
+                    {
+                        if (articleTag.Name == tag)
+                        {
+                            articlesList.Add(article);
+                        }
+                    }
+                }
+            }
+            else if (!string.IsNullOrEmpty(favorited))
             {
                 user = await _userManager.FindByNameAsync(favorited);
                 foreach (var item in user.FavoriteArticles)
@@ -74,33 +90,28 @@ namespace RealWorldApp.BAL.Services
             else if (!string.IsNullOrEmpty(author))
             {
                 user = await _userManager.FindByNameAsync(author);
-                articlesList = await _articleRepositorie.GetAllArticleForUser(user, 999, 0);
+                articlesList = await _articleRepositorie.GetAllArticleForUser(user);
             }
             else
             {
-                articlesList = await _articleRepositorie.GetAllArticle(999, 0);
+                articlesList = await _articleRepositorie.GetAllArticle();
             }
 
             var sortedList = articlesList.OrderByDescending(article => article.FavoritesCount).ToList();
             var resultToMap = sortedList.Skip(offset).Take(limit);
-
-            if (claims != null)
-            {
-                var actualUser = await _userRepositorie.GetUserById(claims.Identity.Name);
             
-                if (actualUser != null)
+            if (actualUser != null)
+            {
+                foreach (var item in resultToMap)
                 {
-                    foreach (var item in resultToMap)
-                    {
-                        item.Favorited = actualUser.FavoriteArticles.Contains(item);
-                    }
+                    item.Favorited = actualUser.FavoriteArticles.Contains(item);
                 }
-                else
+            }
+            else
+            {
+                foreach (var item in resultToMap)
                 {
-                    foreach (var item in resultToMap)
-                    {
-                        item.Favorited = false;
-                    }
+                    item.Favorited = false;
                 }
             }
 
@@ -145,11 +156,26 @@ namespace RealWorldApp.BAL.Services
 
             foreach (var user in actualUser.FollowedUsers)
             {
-                followedUsersArticles.AddRange(await _articleRepositorie.GetAllArticleForUser(user, 999, 0));
+                followedUsersArticles.AddRange(await _articleRepositorie.GetAllArticleForUser(user));
             }
 
             var sortedList = followedUsersArticles.OrderByDescending(article => article.FavoritesCount).ToList();
             var result = sortedList.Skip(offset).Take(limit);
+
+            if (actualUser == null)
+            {
+                foreach (var item in result)
+                {
+                    item.Favorited = false;
+                }
+            }
+            else
+            {
+                foreach (var item in result)
+                {
+                    item.Favorited = actualUser.FavoriteArticles.Contains(item);
+                }
+            }
 
             ArticleResponseModelContainerList articleContainerList = new ArticleResponseModelContainerList() { Articles = _mapper.Map<List<ArticleResponseModel>>(result) };
             articleContainerList.ArticlesCount = followedUsersArticles.Count;
@@ -168,11 +194,15 @@ namespace RealWorldApp.BAL.Services
             }
 
             _articleRepositorie.DeleteArticle(article);
+
+            var checkTags = await _tagService.CheckTags();
+            await _tagService.RemoveTag(checkTags);
         }
 
         public async Task<ArticleResponseModelContainer> UpdateArticle(string slug, CreateUpdateArticleModelContainer updateModel)
         {
             var article = await _articleRepositorie.GetArticleBySlug(slug);
+            var tags = await _tagService.AddTag(updateModel.Article.TagList);
 
             if (article == null)
             {
@@ -196,12 +226,17 @@ namespace RealWorldApp.BAL.Services
                 article.Body = updateModel.Article.Body;
             }
 
+            article.TagList = tags;
             article.UpdateDate = DateTime.Now;
 
             await _articleRepositorie.SaveChangesAsync(article);
 
+            var checkTags = await _tagService.CheckTags();
+            await _tagService.RemoveTag(checkTags);
+
             var articleMapped = _mapper.Map<ArticleResponseModel>(article);
             articleMapped.Author = _mapper.Map<UserArticleResponseModel>(article.Author);
+            articleMapped.TagList = updateModel.Article.TagList;
 
             ArticleResponseModelContainer articleContainer = new ArticleResponseModelContainer() { Article = articleMapped };
 

@@ -22,12 +22,18 @@ namespace RealWorldApp.DAL.Repositories
 
         public async Task<Tag> GetTag(string name)
         {
-            return await _context.tags.Where(x => x.Name == name).FirstOrDefaultAsync();
+            return await _context.tags.Include(x => x.Articles).Where(x => x.Name == name).FirstOrDefaultAsync();
         }
 
         public async Task<List<Tag>> GetTags()
         {
-            return await _context.tags.ToListAsync();
+            return await _context.tags.Include(x => x.Articles).ToListAsync();
+        }
+
+        public void RemoveTag(Tag tag)
+        {
+            _context.Remove(tag);
+            _context.SaveChanges();
         }
     }
 }

@@ -31,6 +31,13 @@ namespace RealWorldApp.BAL.Services
             return response;
         }
 
+        public async Task<List<Tag>> CheckTags()
+        {
+            var tagList = await _tagRepositorie.GetTags();
+
+            return tagList;
+        }
+
         public async Task<List<Tag>> AddTag(List<string> tags)
         {
             var response = new List<Tag>();
@@ -53,5 +60,19 @@ namespace RealWorldApp.BAL.Services
             return response;
         }
 
+        public async Task RemoveTag(List<Tag> tags)
+        {
+            if (tags != null)
+            {
+                foreach (var tag in tags)
+                {
+                    if (tag.Articles.Count == 0)
+                    {
+                        _tagRepositorie.RemoveTag(tag);
+                    }
+                }
+            }
+            
+        }
     }
 }

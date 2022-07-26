@@ -19,26 +19,29 @@ namespace RealWorldApp.DAL.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Article>> GetAllArticle(int limit, int offset)
+        public async Task<List<Article>> GetAllArticle()
         {
             return await _context.articles
                 .OrderByDescending(x => x.CreateDate)
-                .Skip(limit * offset + offset)
-                .Take(limit)
                 .Include(x => x.Author)
                 .Include(x => x.TagList)
                 .ToListAsync();
         }
 
-        public async Task<List<Article>> GetAllArticleForUser(User user, int limit, int offset)
+        public async Task<List<Article>> GetAllArticleForUser(User user)
         {
             return await _context.articles
                 .Include(x => x.Author)
                 .Include(x => x.TagList)
                 .Where(x => x.Author.UserName == user.UserName)
-                .OrderByDescending(x => x.CreateDate)
-                .Skip(limit * offset + offset)
-                .Take(limit)
+                .ToListAsync();
+        }
+
+        public async Task<List<Article>> GetAllArticleForTag()
+        {
+            return await _context.articles
+                .Include(x => x.Author)
+                .Include(x => x.TagList)
                 .ToListAsync();
         }
 

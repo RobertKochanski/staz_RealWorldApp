@@ -6,7 +6,7 @@ namespace RealWorldApp.Commons.Intefaces
     public interface IArticleService
     {
         Task<ArticleResponseModelContainer> AddArticle(CreateUpdateArticleModelContainer addModel, ClaimsPrincipal claims);
-        Task<ArticleResponseModelContainerList> GetArticles(string? author, string? favorited, int limit, int offset, ClaimsPrincipal claims);
+        Task<ArticleResponseModelContainerList> GetArticles(string? author, string? favorited, string? tag, int limit, int offset, ClaimsPrincipal claims);
         Task<ArticleResponseModelContainer> GetArticleBySlug(string slug, ClaimsPrincipal claims);
         Task<ArticleResponseModelContainerList> GetArticleFeed(int limit, int offset, ClaimsPrincipal claims);
         Task DeleteArticle(string slug);

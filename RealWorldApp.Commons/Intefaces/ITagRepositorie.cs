@@ -7,5 +7,6 @@ namespace RealWorldApp.Commons.Intefaces
         Task<List<Tag>> GetTags();
         Task<Tag> GetTag(string name);
         Task<Tag> AddTag(Tag tag);
+        void RemoveTag(Tag tag);
     }
 }

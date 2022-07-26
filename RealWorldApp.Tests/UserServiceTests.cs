@@ -201,6 +201,7 @@ namespace RealWorldApp.Tests
 
             Mock<UserManager<User>> mockUserManager = GetMockUserManager();
             mockUserManager.Setup(x => x.FindByNameAsync(It.IsAny<string>())).ReturnsAsync(user);
+            mockUserManager.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(user);
 
             Mock<IMapper> mockMapper = new Mock<IMapper>();
             mockMapper.Setup(x => x.Map<ProfileResponse>(It.IsAny<User>())).Returns(response);

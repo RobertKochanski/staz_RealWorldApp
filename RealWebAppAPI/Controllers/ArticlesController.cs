@@ -26,9 +26,9 @@ namespace RealWebAppAPI.Controllers
 
         [AllowAnonymous]
         [HttpGet("articles")]
-        public async Task<IActionResult> GetArticles([FromQuery]string? author, [FromQuery]string? favorited, [FromQuery]int limit, [FromQuery]int offset)
+        public async Task<IActionResult> GetArticles([FromQuery]string? author, [FromQuery]string? favorited, [FromQuery] string? tag, [FromQuery]int limit, [FromQuery]int offset)
         {
-            return Ok(await _articleService.GetArticles(author, favorited, limit, offset, User));
+            return Ok(await _articleService.GetArticles(author, favorited, tag, limit, offset, User));
         }
 
         [AllowAnonymous]
