@@ -33,6 +33,7 @@ namespace RealWorldApp.BAL.Services
         public async Task<ArticleResponseModelContainer> AddArticle(CreateUpdateArticleModelContainer addModel, ClaimsPrincipal claims)
         {
             var user = await _userManager.FindByIdAsync(claims.Identity.Name);
+
             var tags = await _tagService.AddTag(addModel.Article.TagList);
 
             var article = new Article
@@ -139,8 +140,7 @@ namespace RealWorldApp.BAL.Services
             articleMapped.Author = _mapper.Map<UserArticleResponseModel>(article.Author);
 
             ArticleResponseModelContainer articleContainer = new ArticleResponseModelContainer() { Article = articleMapped };
-
-            if (actualUser.FollowedUsers.Contains(author))
+            if (actualUser != null && actualUser.FollowedUsers.Contains(author))
             {
                 articleContainer.Article.Author.Following = true;
             }
@@ -206,8 +206,8 @@ namespace RealWorldApp.BAL.Services
 
             if (article == null)
             {
-                _logger.LogError("Can't delete this article!");
-                throw new BadRequestException("Can't delete this article!");
+                _logger.LogError("Can't update this article!");
+                throw new BadRequestException("Can't update this article!");
             }
 
             if (!string.IsNullOrEmpty(updateModel.Article.Title))
