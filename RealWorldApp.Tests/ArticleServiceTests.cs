@@ -172,7 +172,7 @@ namespace RealWorldApp.Tests
 
         [Category("GetArticles")]
         [Test]
-        public async Task GetArticlesForAuthor_ReturnArticleResponseModelContainerList()
+        public async Task GetArticlesForAuthor_WithAuthor_ReturnArticleResponseModelContainerList()
         {
             // ARRANGE
             User user = new User()

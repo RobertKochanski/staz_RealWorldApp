@@ -140,10 +140,16 @@ namespace RealWorldApp.BAL.Services
             articleMapped.Author = _mapper.Map<UserArticleResponseModel>(article.Author);
 
             ArticleResponseModelContainer articleContainer = new ArticleResponseModelContainer() { Article = articleMapped };
-            if (actualUser != null && actualUser.FollowedUsers.Contains(author))
+            if (actualUser != null)
             {
-                articleContainer.Article.Author.Following = true;
+                if (actualUser.FollowedUsers.Contains(author))
+                {
+                    articleContainer.Article.Author.Following = true;
+                }
+
+                articleContainer.Article.Favorited = actualUser.FavoriteArticles.Contains(article);
             }
+            
 
             return articleContainer;
         }
