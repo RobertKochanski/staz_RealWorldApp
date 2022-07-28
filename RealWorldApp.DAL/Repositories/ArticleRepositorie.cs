@@ -28,7 +28,7 @@ namespace RealWorldApp.DAL.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<Article>> GetAllArticleForUser(User user)
+        public async Task<List<Article>> GetAllArticleForAuthor(User user)
         {
             return await _context.articles
                 .Include(x => x.Author)
@@ -37,11 +37,38 @@ namespace RealWorldApp.DAL.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<Article>> GetAllArticleForTag()
+            public async Task<List<Article>> GetAllArticleForFollowedUser(User user)
         {
-            return await _context.articles
-                .Include(x => x.Author)
+            return await _context.Users
+                .Include(fu => fu.FollowedUsers)
+                    .ThenInclude(fa => fa.Articles)
+                        .ThenInclude(faa => faa.Author)
+                .Where(x => x.UserName == user.UserName)
+                .SelectMany(u => u.FollowedUsers.SelectMany(a => a.Articles))
+                .OrderByDescending(u => u.FavoritesCount)
+                .ToListAsync();
+        }
+
+        public async Task<List<Article>> GetAllFavoritedArticles(User user)
+        {
+            return await _context.users
+                .Include(fu => fu.FavoriteArticles)
+                    .ThenInclude(fa => fa.Author)
+                .Where(x => x.UserName == user.UserName)
+                .SelectMany(u => u.FavoriteArticles)
+                .OrderByDescending(u => u.FavoritesCount)
+                .ToListAsync();
+        }
+
+        public async Task<List<Article>> GetAllArticleForTag(string tag)
+        {
+            return await _context.tags
+                .Include(x => x.Articles)
+                .ThenInclude(x => x.Author)
+                .Where(x => x.Name == tag)
+                .SelectMany(x => x.Articles)
                 .Include(x => x.TagList)
+                .OrderByDescending(x => x.FavoritesCount)
                 .ToListAsync();
         }
 

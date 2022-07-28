@@ -68,7 +68,7 @@ namespace RealWorldApp.Tests
 
         [Category("RegisterUser")]
         [Test]
-        public async Task Register_WithUncorrectData_ThrowBadRequestException()
+        public async Task Register_WithIncorrectData_ThrowBadRequestException()
         {
             //Arrange
             UserRegister user = new UserRegister()
@@ -143,7 +143,7 @@ namespace RealWorldApp.Tests
 
         [Category("GetUserByEmail")]
         [Test]
-        public async Task GetUserByEmail_WithUncorrectData_ThrowBadRequestException()
+        public async Task GetUserByEmail_WithIncorrectData_ThrowBadRequestException()
         {
             //Arrange
             User user = null;
@@ -219,7 +219,7 @@ namespace RealWorldApp.Tests
 
         [Category("GetProfile")]
         [Test]
-        public async Task GetMyProfile_WithUncorrectData_ThrowBadRequestException()
+        public async Task GetMyProfile_WithIncorrectData_ThrowBadRequestException()
         {
             //Arrange
             User user = null;
@@ -285,7 +285,7 @@ namespace RealWorldApp.Tests
 
         [Category("GenerateJwt")]
         [Test]
-        public async Task GenerateToken_WithUncorrectUsername_ThrowBadRequestException()
+        public async Task GenerateToken_WithIncorrectUsername_ThrowBadRequestException()
         {
             //Arrange
             UserLogin userLogin = new UserLogin
@@ -312,7 +312,7 @@ namespace RealWorldApp.Tests
 
         [Category("GenerateJwt")]
         [Test]
-        public async Task GenerateToken_WithUncorrectPassword_ThrowBadRequestException()
+        public async Task GenerateToken_WithIncorrectPassword_ThrowBadRequestException()
         {
             //Arrange
             UserLogin userLogin = new UserLogin
@@ -459,7 +459,7 @@ namespace RealWorldApp.Tests
 
         [Category("UpdateUser")]
         [Test]
-        public async Task UpdateUser_WithUncorrectData_ThrowBadRequestException()
+        public async Task UpdateUser_WithIncorrectData_ThrowBadRequestException()
         {
             //Arrange
             User userToChange = new User

@@ -6,8 +6,10 @@ namespace RealWorldApp.Commons.Intefaces
     {
         Task AddArticle(Article article);
         Task<List<Article>> GetAllArticle();
-        Task<List<Article>> GetAllArticleForUser(User user);
-        Task<List<Article>> GetAllArticleForTag();
+        Task<List<Article>> GetAllArticleForAuthor(User user);
+        Task<List<Article>> GetAllFavoritedArticles(User user);
+        Task<List<Article>> GetAllArticleForFollowedUser(User user);
+        Task<List<Article>> GetAllArticleForTag(string tag);
         Task<Article> GetArticleBySlug(string slug);
         void DeleteArticle(Article article);
         Task SaveChangesAsync(Article article);

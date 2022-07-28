@@ -32,8 +32,13 @@ namespace RealWorldApp.BAL.Services
 
         public async Task<ArticleResponseModelContainer> AddArticle(CreateUpdateArticleModelContainer addModel, ClaimsPrincipal claims)
         {
-            var user = await _userManager.FindByIdAsync(claims.Identity.Name);
+            if (string.IsNullOrEmpty(addModel.Article.Title) || string.IsNullOrEmpty(addModel.Article.Description) || string.IsNullOrEmpty(addModel.Article.Body))
+            {
+                _logger.LogError("Please fill all required fields");
+                throw new BadRequestException("Please fill all required fields");
+            }
 
+            var user = await _userManager.FindByIdAsync(claims.Identity.Name);
             var tags = await _tagService.AddTag(addModel.Article.TagList);
 
             var article = new Article
@@ -68,30 +73,17 @@ namespace RealWorldApp.BAL.Services
 
             if (!string.IsNullOrEmpty(tag))
             {
-                var allArticle = await _articleRepositorie.GetAllArticleForTag();
-                foreach (var article in allArticle)
-                {
-                    foreach (var articleTag in article.TagList)
-                    {
-                        if (articleTag.Name == tag)
-                        {
-                            articlesList.Add(article);
-                        }
-                    }
-                }
+                articlesList = await _articleRepositorie.GetAllArticleForTag(tag);
             }
             else if (!string.IsNullOrEmpty(favorited))
             {
                 user = await _userManager.FindByNameAsync(favorited);
-                foreach (var item in user.FavoriteArticles)
-                {
-                    articlesList.Add(await _articleRepositorie.GetArticleBySlug(item.Slug));
-                }
+                articlesList = await _articleRepositorie.GetAllFavoritedArticles(user);
             }
             else if (!string.IsNullOrEmpty(author))
             {
                 user = await _userManager.FindByNameAsync(author);
-                articlesList = await _articleRepositorie.GetAllArticleForUser(user);
+                articlesList = await _articleRepositorie.GetAllArticleForAuthor(user);
             }
             else
             {
@@ -127,14 +119,15 @@ namespace RealWorldApp.BAL.Services
         public async Task<ArticleResponseModelContainer> GetArticleBySlug(string slug, ClaimsPrincipal claims)
         {
             var article = await _articleRepositorie.GetArticleBySlug(slug);
-            var author = await _userManager.FindByNameAsync(article.Author.UserName);
-            var actualUser = await _userManager.FindByIdAsync(claims.Identity.Name);
 
             if (article == null)
             {
                 _logger.LogError("Can't find article with this slug!");
                 throw new BadRequestException("Can't find article with this slug!");
             }
+
+            var author = await _userManager.FindByNameAsync(article.Author.UserName);
+            var actualUser = await _userManager.FindByIdAsync(claims.Identity.Name);
 
             var articleMapped = _mapper.Map<ArticleResponseModel>(article);
             articleMapped.Author = _mapper.Map<UserArticleResponseModel>(article.Author);
@@ -158,29 +151,13 @@ namespace RealWorldApp.BAL.Services
         {
             var actualUser = await _userRepositorie.GetUserById(claims.Identity.Name);
 
-            var followedUsersArticles = new List<Article>();
+            var followedUsersArticles = (await _articleRepositorie.GetAllArticleForFollowedUser(actualUser));
 
-            foreach (var user in actualUser.FollowedUsers)
-            {
-                followedUsersArticles.AddRange(await _articleRepositorie.GetAllArticleForUser(user));
-            }
+            var result = followedUsersArticles.Skip(offset).Take(limit);
 
-            var sortedList = followedUsersArticles.OrderByDescending(article => article.FavoritesCount).ToList();
-            var result = sortedList.Skip(offset).Take(limit);
-
-            if (actualUser == null)
+            foreach (var item in result)
             {
-                foreach (var item in result)
-                {
-                    item.Favorited = false;
-                }
-            }
-            else
-            {
-                foreach (var item in result)
-                {
-                    item.Favorited = actualUser.FavoriteArticles.Contains(item);
-                }
+                item.Favorited = actualUser.FavoriteArticles.Contains(item);
             }
 
             ArticleResponseModelContainerList articleContainerList = new ArticleResponseModelContainerList() { Articles = _mapper.Map<List<ArticleResponseModel>>(result) };
