@@ -34,8 +34,16 @@ namespace RealWorldApp.BAL.Services
         {
             if (string.IsNullOrEmpty(addModel.Article.Title) || string.IsNullOrEmpty(addModel.Article.Description) || string.IsNullOrEmpty(addModel.Article.Body))
             {
-                _logger.LogError("Please fill all required fields");
-                throw new BadRequestException("Please fill all required fields");
+                _logger.LogError("Please fill all required fields!");
+                throw new BadRequestException("Please fill all required fields!");
+            }
+
+            var slug = Slug.GenerateSlug(addModel.Article.Title);
+
+            if (await _articleRepositorie.GetArticleBySlug(slug) != null)
+            {
+                _logger.LogError("Article with this title already exist!");
+                throw new BadRequestException("Article with this title already exist!");
             }
 
             var user = await _userManager.FindByIdAsync(claims.Identity.Name);
@@ -151,7 +159,7 @@ namespace RealWorldApp.BAL.Services
         {
             var actualUser = await _userRepositorie.GetUserById(claims.Identity.Name);
 
-            var followedUsersArticles = (await _articleRepositorie.GetAllArticleForFollowedUser(actualUser));
+            var followedUsersArticles = await _articleRepositorie.GetAllArticleForFollowedUser(actualUser);
 
             var result = followedUsersArticles.Skip(offset).Take(limit);
 
@@ -185,13 +193,14 @@ namespace RealWorldApp.BAL.Services
         public async Task<ArticleResponseModelContainer> UpdateArticle(string slug, CreateUpdateArticleModelContainer updateModel)
         {
             var article = await _articleRepositorie.GetArticleBySlug(slug);
-            var tags = await _tagService.AddTag(updateModel.Article.TagList);
 
             if (article == null)
             {
                 _logger.LogError("Can't update this article!");
                 throw new BadRequestException("Can't update this article!");
             }
+
+            var tags = await _tagService.AddTag(updateModel.Article.TagList);
 
             if (!string.IsNullOrEmpty(updateModel.Article.Title))
             {
@@ -242,7 +251,6 @@ namespace RealWorldApp.BAL.Services
             
             var articleMapped = _mapper.Map<ArticleResponseModel>(article);
             articleMapped.Author = _mapper.Map<UserArticleResponseModel>(article.Author);
-            articleMapped.FavoritesCount++;
 
             ArticleResponseModelContainer articleContainer = new ArticleResponseModelContainer() { Article = articleMapped };
 
@@ -254,16 +262,14 @@ namespace RealWorldApp.BAL.Services
             var article = await _articleRepositorie.GetArticleBySlug(slug);
             var user = await _userManager.FindByIdAsync(claims.Identity.Name);
 
-            if (user == null || article == null)
+            if (user != null && article != null)
             {
-                throw new BadRequestException("");
+                user.FavoriteArticles.Remove(article);
+                await _userManager.UpdateAsync(user);
+
+                article.FavoritesCount--;
+                await _articleRepositorie.SaveChangesAsync(article);
             }
-
-            user.FavoriteArticles.Remove(article);
-            await _userManager.UpdateAsync(user);
-
-            article.FavoritesCount--;
-            await _articleRepositorie.SaveChangesAsync(article);
 
             var articleMapped = _mapper.Map<ArticleResponseModel>(article);
             articleMapped.Author = _mapper.Map<UserArticleResponseModel>(article.Author);

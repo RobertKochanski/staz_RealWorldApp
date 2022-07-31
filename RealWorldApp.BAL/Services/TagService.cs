@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using RealWorldApp.Commons.Entities;
+﻿using RealWorldApp.Commons.Entities;
 using RealWorldApp.Commons.Intefaces;
 using RealWorldApp.Commons.Models.TagModel;
 
@@ -8,12 +7,10 @@ namespace RealWorldApp.BAL.Services
     public class TagService : ITagService
     {
         private readonly ITagRepositorie _tagRepositorie;
-        private readonly IMapper _mapper;
 
-        public TagService(ITagRepositorie tagRepositorie, IMapper mapper)
+        public TagService(ITagRepositorie tagRepositorie)
         {
             _tagRepositorie = tagRepositorie;
-            _mapper = mapper;
         }
 
         public async Task<TagResponseModel> GetTags()

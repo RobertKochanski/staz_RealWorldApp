@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using RealWorldApp.Commons.Entities;
+using RealWorldApp.Commons.Exceptions;
 using RealWorldApp.Commons.Intefaces;
 using RealWorldApp.Commons.Models.CommentModel;
 using System.Security.Claims;
@@ -26,6 +27,11 @@ namespace RealWorldApp.BAL.Services
         {
             User user = await _userManager.FindByIdAsync(claims.Identity.Name);
             Article article = await _articleRepositorie.GetArticleBySlug(slug);
+
+            if (article == null)
+            {
+                throw new BadRequestException("Can't find article!");
+            }
 
             Comment comment = new Comment
             {
