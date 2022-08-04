@@ -1,4 +1,5 @@
 using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,8 +9,10 @@ using RealWorldApp.BAL;
 using RealWorldApp.BAL.Services;
 using RealWorldApp.Commons.Entities;
 using RealWorldApp.Commons.Intefaces;
+using RealWorldApp.CQRS.Users.Commends;
 using RealWorldApp.DAL;
 using RealWorldApp.DAL.Repositories;
+using System.Reflection;
 using System.Text;
 
 namespace RealWebAppAPI
@@ -64,6 +67,9 @@ namespace RealWebAppAPI
                 };
             })
             .AddIdentityServerJwt();
+
+            builder.Services.AddMediatR(typeof(Program));
+            builder.Services.AddMediatR(typeof(CreateUserCommand).GetTypeInfo().Assembly);
 
             builder.Services.AddScoped<IUserRepositorie, UserRepositorie>();
             builder.Services.AddScoped<IUserService, UserService>();

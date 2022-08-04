@@ -3,6 +3,7 @@ using RealWorldApp.Commons.Entities;
 using RealWorldApp.Commons.Models.ArticleModel;
 using RealWorldApp.Commons.Models.CommentModel;
 using RealWorldApp.Commons.Models.UserModel;
+using RealWorldApp.CQRS.Users.Commends;
 
 namespace RealWebAppAPI
 {
@@ -13,6 +14,7 @@ namespace RealWebAppAPI
             CreateMap<User, ViewUserModel>();
             CreateMap<User, UserResponse>();
             CreateMap<User, ProfileResponse>();
+            CreateMap<CreateUserCommand, User>().ReverseMap();
 
             CreateMap<Article, ArticleResponseModel>()
                 .ForMember(x => x.CreatedAt, opt => opt.MapFrom(x => x.CreateDate))

@@ -8,7 +8,7 @@ using RealWorldApp.Commons.Exceptions;
 using RealWorldApp.Commons.Models.UserModel;
 using System.Security.Claims;
 
-namespace RealWorldApp.Tests.UserServiceTests
+namespace RealWorldApp.Tests.UnitTests.UserServiceTests
 {
     public class GetUserProfileTests
     {

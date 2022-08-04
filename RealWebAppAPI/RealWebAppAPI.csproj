@@ -9,6 +9,8 @@
 
   <ItemGroup>
 	<PackageReference Include="AutoMapper" Version="11.0.1" />
+	<PackageReference Include="MediatR" Version="10.0.1" />
+	<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
 	<PackageReference Include="Microsoft.AspNetCore.ApiAuthorization.IdentityServer" Version="6.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.7" />
@@ -25,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\RealWorldApp.BAL\RealWorldApp.BAL.csproj" />
     <ProjectReference Include="..\RealWorldApp.Commons\RealWorldApp.Commons.csproj" />
+    <ProjectReference Include="..\RealWorldApp.CQRS\RealWorldApp.CQRS.csproj" />
     <ProjectReference Include="..\RealWorldApp.DAL\RealWorldApp.DAL.csproj" />
   </ItemGroup>
 

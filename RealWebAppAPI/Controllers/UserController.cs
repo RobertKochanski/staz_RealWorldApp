@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using RealWorldApp.Commons.Intefaces;
 using RealWorldApp.Commons.Models.UserModel;
+using RealWorldApp.CQRS.Users.Commends;
 
 namespace RealWebAppAPI.Controllers
 {
@@ -12,27 +14,25 @@ namespace RealWebAppAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IMediator _mediator;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IMediator mediator)
         {
             _userService = userService;
+            _mediator = mediator;
         }
 
         [AllowAnonymous]
         [HttpPost("users")]
-        public async Task<IActionResult> RegisterUser([FromBody]UserRegisterContainer model)
+        public async Task<IActionResult> RegisterUser(CreateUserCommand command)
         {
-            UserResponseContainer user = await _userService.AddUser(model.User);
-            string token = await _userService.GenerateJwt(model.User.Email, model.User.Password);
-
-            user.User.Token = token;
-
-            return Ok(user);
+            
+            return Ok(await _mediator.Send(command));
         }
 
         [AllowAnonymous]
         [HttpPost("users/login")]
-        public async Task<IActionResult> Authenticate([FromBody]UserLoginContainer model)
+        public async Task<IActionResult> Authenticate([FromBody] UserLoginContainer model)
         {
             UserResponseContainer user = await _userService.GetUserByEmail(model.User.Email);
             string token = await _userService.GenerateJwt(model.User.Email, model.User.Password);
@@ -41,6 +41,13 @@ namespace RealWebAppAPI.Controllers
 
             return Ok(user);
         }
+
+        //[AllowAnonymous]
+        //[HttpPost("users/login")]
+        //public async Task<IActionResult> Authenticate(AuthenticateUserCommand command)
+        //{
+        //    return Ok(await _mediator.Send(command));
+        //}
 
         [HttpGet("user")]
         public async Task<IActionResult> GetMyInfo()

@@ -8,7 +8,7 @@ using RealWorldApp.Commons.Intefaces;
 using RealWorldApp.Commons.Models.CommentModel;
 using System.Security.Claims;
 
-namespace RealWorldApp.Tests.CommentServiceTests
+namespace RealWorldApp.Tests.UnitTests.CommentServiceTests
 {
     public class AddCommentTests
     {

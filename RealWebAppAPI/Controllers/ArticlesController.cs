@@ -49,7 +49,7 @@ namespace RealWebAppAPI.Controllers
         {
             await _articleService.DeleteArticle(slug);
 
-            return Ok();
+            return NoContent();
         }
 
         [HttpPut("articles/{slug}")]

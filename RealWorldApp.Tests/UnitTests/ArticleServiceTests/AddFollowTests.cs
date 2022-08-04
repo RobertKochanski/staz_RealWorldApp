@@ -7,7 +7,7 @@ using RealWorldApp.Commons.Intefaces;
 using RealWorldApp.Commons.Models.ArticleModel;
 using System.Security.Claims;
 
-namespace RealWorldApp.Tests.ArticleServiceTests
+namespace RealWorldApp.Tests.UnitTests.ArticleServiceTests
 {
     public class AddFollowTests
     {
@@ -85,7 +85,7 @@ namespace RealWorldApp.Tests.ArticleServiceTests
             // ASSERT
             Assert.IsTrue(result.Article.Favorited);
             Assert.That(expect.Article.Favorited, Is.EqualTo(result.Article.Favorited));
-            Assert.That(expect.Article.FavoritesCount, Is.EqualTo(result.Article.FavoritesCount)); 
+            Assert.That(expect.Article.FavoritesCount, Is.EqualTo(result.Article.FavoritesCount));
         }
     }
 }
