@@ -11,7 +11,7 @@ using RealWorldApp.DAL;
 namespace RealWorldApp.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220805123409_init")]
+    [Migration("20220805130027_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

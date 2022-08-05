@@ -11,6 +11,7 @@ namespace RealWorldApp.DAL
         public ApplicationDbContext(DbContextOptions options, IOptions<OperationalStoreOptions> operationalStoreOptions)
             : base(options, operationalStoreOptions)
         {
+            Database.EnsureCreated();
         }
 
         public DbSet<Article> articles { get; set; }
