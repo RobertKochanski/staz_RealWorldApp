@@ -5,6 +5,6 @@ namespace RealWorldApp.CQRS.Users.Commends
 {
     public class CreateUserCommand : IRequest<UserResponseContainer>
     {
-        public UserRegister user { get; set; }
+        public UserRegister User { get; set; }
     }
 }

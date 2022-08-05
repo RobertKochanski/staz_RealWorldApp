@@ -30,24 +30,24 @@ namespace RealWebAppAPI.Controllers
             return Ok(await _mediator.Send(command));
         }
 
-        [AllowAnonymous]
-        [HttpPost("users/login")]
-        public async Task<IActionResult> Authenticate([FromBody] UserLoginContainer model)
-        {
-            UserResponseContainer user = await _userService.GetUserByEmail(model.User.Email);
-            string token = await _userService.GenerateJwt(model.User.Email, model.User.Password);
-
-            user.User.Token = token;
-
-            return Ok(user);
-        }
-
         //[AllowAnonymous]
         //[HttpPost("users/login")]
-        //public async Task<IActionResult> Authenticate(AuthenticateUserCommand command)
+        //public async Task<IActionResult> Authenticate([FromBody] UserLoginContainer model)
         //{
-        //    return Ok(await _mediator.Send(command));
+        //    UserResponseContainer user = await _userService.GetUserByEmail(model.User.Email);
+        //    string token = await _userService.GenerateJwt(model.User.Email, model.User.Password);
+
+        //    user.User.Token = token;
+
+        //    return Ok(user);
         //}
+
+        [AllowAnonymous]
+        [HttpPost("users/login")]
+        public async Task<IActionResult> Authenticate(AuthenticateUserCommand command)
+        {
+            return Ok(await _mediator.Send(command));
+        }
 
         [HttpGet("user")]
         public async Task<IActionResult> GetMyInfo()

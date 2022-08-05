@@ -25,12 +25,12 @@ namespace RealWorldApp.CQRS.Users.Commends
         {
             User user = new User()
             {
-                UserName = request.user.Username,
+                UserName = request.User.Username,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                Email = request.user.Email,
+                Email = request.User.Email,
             };
 
-            var result = await _userManager.CreateAsync(user, request.user.Password);
+            var result = await _userManager.CreateAsync(user, request.User.Password);
 
             if (!result.Succeeded)
             {
@@ -38,7 +38,7 @@ namespace RealWorldApp.CQRS.Users.Commends
             }
 
             var userResponse = _mapper.Map<UserResponse>(user);
-            var token = await _userService.GenerateJwt(request.user.Email, request.user.Password);
+            var token = await _userService.GenerateJwt(request.User.Email, request.User.Password);
             userResponse.Token = token;
 
             var response = new UserResponseContainer { User = userResponse };

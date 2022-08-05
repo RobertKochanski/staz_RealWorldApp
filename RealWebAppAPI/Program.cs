@@ -28,9 +28,19 @@ namespace RealWebAppAPI
             builder.Services.AddControllers();
 
             // Add services to the container.
+            var useInMemory = builder.Configuration.GetValue<bool>("UseInMemory");
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            {
+                if (useInMemory)
+                {
+                    options.UseInMemoryDatabase(connectionString);
+                }
+                else
+                {
+                    options.UseSqlServer(connectionString);
+                }
+            });
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -68,7 +78,6 @@ namespace RealWebAppAPI
             })
             .AddIdentityServerJwt();
 
-            builder.Services.AddMediatR(typeof(Program));
             builder.Services.AddMediatR(typeof(CreateUserCommand).GetTypeInfo().Assembly);
 
             builder.Services.AddScoped<IUserRepositorie, UserRepositorie>();
