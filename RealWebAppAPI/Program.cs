@@ -1,4 +1,5 @@
 using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,8 +9,10 @@ using RealWorldApp.BAL;
 using RealWorldApp.BAL.Services;
 using RealWorldApp.Commons.Entities;
 using RealWorldApp.Commons.Intefaces;
+using RealWorldApp.CQRS.Users.Commends;
 using RealWorldApp.DAL;
 using RealWorldApp.DAL.Repositories;
+using System.Reflection;
 using System.Text;
 
 namespace RealWebAppAPI
@@ -25,9 +28,25 @@ namespace RealWebAppAPI
             builder.Services.AddControllers();
 
             // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            var useInMemory = builder.Configuration.GetValue<bool>("UseInMemory");
+            var useSQLite = builder.Configuration.GetValue<bool>("SQLite");
+            
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            {
+                if (useInMemory)
+                {
+                    options.UseInMemoryDatabase("InMemory");
+                }
+                else if (useSQLite)
+                {
+                    options.UseSqlite($"Data Source=sqlite.db");
+                }
+                else
+                {
+                    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+                    options.UseSqlServer(connectionString);
+                }
+            });
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -64,6 +83,8 @@ namespace RealWebAppAPI
                 };
             })
             .AddIdentityServerJwt();
+
+            builder.Services.AddMediatR(typeof(CreateUserCommand).GetTypeInfo().Assembly);
 
             builder.Services.AddScoped<IUserRepositorie, UserRepositorie>();
             builder.Services.AddScoped<IUserService, UserService>();

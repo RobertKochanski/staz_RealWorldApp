@@ -7,7 +7,7 @@ using RealWorldApp.Commons.Entities;
 using RealWorldApp.Commons.Exceptions;
 using RealWorldApp.Commons.Models.UserModel;
 
-namespace RealWorldApp.Tests.UserServiceTests
+namespace RealWorldApp.Tests.UnitTests.UserServiceTests
 {
     public class GetUserByEmailTests
     {

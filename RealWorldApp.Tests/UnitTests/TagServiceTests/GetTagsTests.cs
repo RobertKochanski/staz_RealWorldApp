@@ -4,7 +4,7 @@ using RealWorldApp.Commons.Entities;
 using RealWorldApp.Commons.Intefaces;
 using RealWorldApp.Commons.Models.TagModel;
 
-namespace RealWorldApp.Tests.TagServiceTests
+namespace RealWorldApp.Tests.UnitTests.TagServiceTests
 {
     public class GetTagsTests
     {

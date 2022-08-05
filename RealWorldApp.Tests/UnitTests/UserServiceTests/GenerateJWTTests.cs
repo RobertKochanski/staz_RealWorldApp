@@ -8,7 +8,7 @@ using RealWorldApp.Commons.Exceptions;
 using RealWorldApp.Commons.Intefaces;
 using RealWorldApp.Commons.Models.UserModel;
 
-namespace RealWorldApp.Tests.UserServiceTests
+namespace RealWorldApp.Tests.UnitTests.UserServiceTests
 {
     public class GenerateJWTTests
     {

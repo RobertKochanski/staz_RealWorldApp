@@ -6,7 +6,7 @@ using RealWorldApp.Commons.Intefaces;
 using RealWorldApp.Commons.Models.CommentModel;
 using System.Security.Claims;
 
-namespace RealWorldApp.Tests.CommentServiceTests
+namespace RealWorldApp.Tests.UnitTests.CommentServiceTests
 {
     public class GetCommentsListForArticleTests
     {
@@ -59,7 +59,7 @@ namespace RealWorldApp.Tests.CommentServiceTests
             Assert.That(result, Is.Not.Null);
             Assert.That(expect.GetType(), Is.EqualTo(result.GetType()));
             Assert.That(expect.Comments.Count, Is.EqualTo(result.Comments.Count));
-            
+
         }
     }
 }

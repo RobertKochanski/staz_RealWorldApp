@@ -7,7 +7,7 @@ using RealWorldApp.Commons.Exceptions;
 using RealWorldApp.Commons.Intefaces;
 using RealWorldApp.Commons.Models.ArticleModel;
 
-namespace RealWorldApp.Tests.ArticleServiceTests
+namespace RealWorldApp.Tests.UnitTests.ArticleServiceTests
 {
     public class UpdateArticleTests
     {

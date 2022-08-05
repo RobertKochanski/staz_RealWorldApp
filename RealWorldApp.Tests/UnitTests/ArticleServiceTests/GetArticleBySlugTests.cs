@@ -9,7 +9,7 @@ using RealWorldApp.Commons.Intefaces;
 using RealWorldApp.Commons.Models.ArticleModel;
 using System.Security.Claims;
 
-namespace RealWorldApp.Tests.ArticleServiceTests
+namespace RealWorldApp.Tests.UnitTests.ArticleServiceTests
 {
     public class GetArticleBySlugTests
     {

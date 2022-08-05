@@ -3,7 +3,7 @@ using RealWorldApp.BAL.Services;
 using RealWorldApp.Commons.Entities;
 using RealWorldApp.Commons.Intefaces;
 
-namespace RealWorldApp.Tests.TagServiceTests
+namespace RealWorldApp.Tests.UnitTests.TagServiceTests
 {
     public class AddTagTests
     {
