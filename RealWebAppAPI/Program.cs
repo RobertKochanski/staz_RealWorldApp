@@ -34,7 +34,7 @@ namespace RealWebAppAPI
             {
                 if (useInMemory)
                 {
-                    options.UseInMemoryDatabase(connectionString);
+                    options.UseInMemoryDatabase("InMemory");
                 }
                 else
                 {
