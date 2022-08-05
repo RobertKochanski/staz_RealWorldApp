@@ -27,7 +27,7 @@ env:
 on:
   push:
     branches:
-      - "cqrs"
+      - "master"
   workflow_dispatch:
 
 permissions:
