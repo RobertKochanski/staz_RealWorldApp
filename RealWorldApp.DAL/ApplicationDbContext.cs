@@ -18,6 +18,9 @@ namespace RealWorldApp.DAL
         public DbSet<Tag> tags { get; set; }
         public DbSet<User> users { get; set; }
 
+        //protected override void OnConfiguring(DbContextOptionsBuilder options)
+        //=> options.UseSqlite($"Data Source=sqlite.db");
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // USER

@@ -29,15 +29,21 @@ namespace RealWebAppAPI
 
             // Add services to the container.
             var useInMemory = builder.Configuration.GetValue<bool>("UseInMemory");
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            var useSQLite = builder.Configuration.GetValue<bool>("SQLite");
+            
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 if (useInMemory)
                 {
                     options.UseInMemoryDatabase("InMemory");
                 }
+                else if (useSQLite)
+                {
+                    options.UseSqlite($"Data Source=sqlite.db");
+                }
                 else
                 {
+                    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
                     options.UseSqlServer(connectionString);
                 }
             });
